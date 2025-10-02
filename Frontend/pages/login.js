@@ -1,13 +1,22 @@
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleLogin = (e) => {
+  const { login } = useAuth();
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Logging in:", email, password);
-    // TODO: connect Firebase Auth here
+    try {
+      await login(email, password);
+      alert("Login successful!");
+      window.location.href = "/"; // redirect to homepage
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -17,6 +26,7 @@ export default function Login() {
         className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
       >
         <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">Login</h1>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
         <input
           type="email"
           placeholder="Email"
