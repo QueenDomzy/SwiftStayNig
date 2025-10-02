@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2020",                          
+    "module": "CommonJS",                        
+    "lib": ["ES2020"],                           
+    "esModuleInterop": true,                     
+    "allowSyntheticDefaultImports": true,        
+    "resolveJsonModule": true,                   
+    "types": ["node"],                           
+
+    /* Strictness */
+    "strict": true,                              
+    "forceConsistentCasingInFileNames": true,    
+    "skipLibCheck": true,                        
+
+    /* Module Resolution */
+    "moduleResolution": "node",                  
+    "baseUrl": ".",                              
+    "paths": {
+      "@/*": ["server/*"]                        
+    },
+
+    /* Output */
+    "rootDir": "./",                             
+    "outDir": "./dist",                          
+    "sourceMap": true,                           
+    "removeComments": true,                      
+
+    /* Incremental Builds */
+    "incremental": true,                         
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"     
+  },
+  "include": ["server/**/*.ts", "prisma/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
