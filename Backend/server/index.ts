@@ -15,6 +15,11 @@ const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
 
+// Root route
+app.get("/", (req, res) => {
+  res.json({ message: "SwiftStay Backend running ✅" });
+});
+
 // Routes
 app.use("/auth", authRoutes);
 app.use("/properties", propertyRoutes);
