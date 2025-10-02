@@ -52,14 +52,13 @@ model Booking {
 }
 
 model Payment {
-  id         Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   bookingId  Int
   provider   String
   amount     Float
   status     String    @default("pending")
   reference  String
-  createdAt  DateTime  @default(now())
+  createdAt  DateTime @default(now())
 
-  // Relations
   booking Booking @relation(fields: [bookingId], references: [id])
 }
