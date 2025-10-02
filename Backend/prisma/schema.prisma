@@ -48,7 +48,7 @@ model Booking {
   // Relations
   user     User     @relation(fields: [userId], references: [id])
   property Property @relation(fields: [propertyId], references: [id])
-  payment  Payment?
+  payments Payment[]   // 👈 Allow multiple
 }
 
 model Payment {
