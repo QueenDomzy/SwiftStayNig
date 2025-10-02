@@ -1,11 +1,11 @@
 {
   "name": "swiftstay-backend",
   "version": "1.0.0",
-  "main": "dist/server/index.js",   // compiled entry
+  "main": "dist/server/index.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"tsx server/index.ts\"",
     "build": "tsc",
-    "start": "node dist/server/index.js",  // run compiled JS
+    "start": "node dist/server/index.js",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:generate": "prisma generate"
   },
