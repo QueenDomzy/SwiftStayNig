@@ -29,16 +29,26 @@ router.post("/", async (req, res) => {
 
     res.json(booking);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Failed to create booking" });
   }
 });
 
 // Get bookings
 router.get("/", async (req, res) => {
-  const bookings = await prisma.booking.findMany({
-    include: { user: true, property: true, payment: true },
-  });
-  res.json(bookings);
+  try {
+    const bookings = await prisma.booking.findMany({
+      include: {
+        user: true,
+        property: true,
+        payments: true, // ✅ FIXED (plural)
+      },
+    });
+    res.json(bookings);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch bookings" });
+  }
 });
 
 export default router;
