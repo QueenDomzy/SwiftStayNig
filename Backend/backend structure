@@ -1,0 +1,6 @@
+swiftstay-backend/
+│── package.json
+│── server.js
+│── .env.example
+│── prisma/
+│   └── schema.prisma
