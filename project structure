@@ -1,0 +1,27 @@
+swiftstay-frontend/
+│── package.json
+│── next.config.js
+│── postcss.config.js
+│── tailwind.config.js
+│── .env.local.example
+│── styles/
+│   └── globals.css
+│── pages/
+│   ├── index.js                # Landing Page
+│   ├── properties.js           # Listings Page
+│   ├── property/[id].js        # Property Details
+│   ├── booking/[id].js         # Booking & Payment
+│   ├── auth/login.js           # Login Page
+│   ├── auth/signup.js          # Signup Page
+│   ├── dashboard.js            # User Dashboard
+│   └── admin/index.js          # Admin Dashboard + Ads
+│── components/
+│   ├── Navbar.js
+│   ├── Footer.js
+│   ├── PropertyCard.js
+│   ├── SearchBar.js
+│   ├── AdsDashboard.js
+│   └── QRCodeDisplay.js
+│── utils/
+│   ├── api.js
+│   └── auth.js
