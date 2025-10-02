@@ -1,25 +1,26 @@
 {
   "name": "swiftstay-backend",
   "version": "1.0.0",
-  "main": "server.js",
-  "type": "module",
+  "main": "server/index.ts",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
-    "prisma:migrate": "prisma migrate dev",
+    "dev": "concurrently \"vite\" \"tsx server/index.ts\"",
+    "build": "tsc",
+    "start": "node dist/server/index.js",
+    "prisma:migrate": "prisma migrate dev --name init",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "@prisma/client": "^5.0.0",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "jsonwebtoken": "^9.0.0",
-    "@prisma/client": "latest",
-    "firebase-admin": "^11.10.1",
-    "body-parser": "^1.20.2"
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
-    "prisma": "latest"
+    "concurrently": "^8.2.2",
+    "prisma": "^5.0.0",
+    "tsx": "^3.12.7",
+    "typescript": "^5.2.2"
   }
 }
