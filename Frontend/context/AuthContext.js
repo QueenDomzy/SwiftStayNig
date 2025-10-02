@@ -1,13 +1,12 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { createContext, useContext, useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { app } from "../lib/firebase";
 
 const AuthContext = createContext();
 
-// Wrap your app with this provider
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // optional, to wait for auth check
+  const [loading, setLoading] = useState(true);
 
   const auth = getAuth(app);
 
@@ -16,16 +15,19 @@ export function AuthProvider({ children }) {
       setUser(currentUser);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, [auth]);
 
+  // Helpers
+  const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  const signup = (email, password) => createUserWithEmailAndPassword(auth, email, password);
+  const logout = () => signOut(auth);
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
-      {children}
+    <AuthContext.Provider value={{ user, login, signup, logout }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
 
-// Hook to use auth anywhere
 export const useAuth = () => useContext(AuthContext);
