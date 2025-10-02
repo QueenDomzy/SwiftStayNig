@@ -8,11 +8,11 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
   password  String?
   role      String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   // Relations
   properties Property[]
@@ -20,22 +20,22 @@ model User {
 }
 
 model Property {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   location    String
   price       Float
   description String
   images      String[]
   ownerId     Int
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   // Relations
-  owner    User     @relation(fields: [ownerId], references: [id])
+  owner    User      @relation(fields: [ownerId], references: [id])
   bookings Booking[]
 }
 
 model Booking {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   userId      Int
   propertyId  Int
   checkIn     DateTime
@@ -43,22 +43,22 @@ model Booking {
   status      String    @default("pending")
   totalPrice  Float
   commission  Float
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   // Relations
-  user     User     @relation(fields: [userId], references: [id])
-  property Property @relation(fields: [propertyId], references: [id])
-  payments Payment[]   // 👈 Allow multiple
+  user      User      @relation(fields: [userId], references: [id])
+  property  Property  @relation(fields: [propertyId], references: [id])
+  payments  Payment[]   // 👈 Correct plural relation
 }
 
 model Payment {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   bookingId  Int
   provider   String
   amount     Float
   status     String    @default("pending")
   reference  String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
 
   // Relations
   booking Booking @relation(fields: [bookingId], references: [id])
