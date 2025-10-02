@@ -8,7 +8,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"]   // 👈 ensure this is here
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "types": ["node"]
   },
   "include": ["server/**/*.ts", "prisma/**/*.ts"],
   "exclude": ["node_modules", "dist"]
