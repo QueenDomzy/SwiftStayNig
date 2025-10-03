@@ -8,13 +8,13 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   full_name String
-  email     String   @unique
+  email     String    @unique
   phone     String?
   password  String
-  role      String   @default("guest") // guest, owner, admin
-  createdAt DateTime @default(now())
+  role      String    @default("guest") // guest, owner, admin
+  createdAt DateTime  @default(now())
 
   properties Property[]
   bookings   Booking[]
@@ -22,14 +22,14 @@ model User {
 }
 
 model Property {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   ownerId     Int
   name        String
   description String?
   location    String
   price       Float
   images      String[]
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   owner    User      @relation(fields: [ownerId], references: [id])
   bookings Booking[]
@@ -43,29 +43,31 @@ model Booking {
   checkIn    DateTime
   checkOut   DateTime
   totalPrice Float
-  commission Float?    // NEW: optional commission field
   status     String    @default("pending") // pending, confirmed, cancelled
   createdAt  DateTime  @default(now())
 
-  property  Property  @relation(fields: [propertyId], references: [id])
-  user      User      @relation(fields: [userId], references: [id])
+  property  Property @relation(fields: [propertyId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   payments  Payment[] // one-to-many relation
 }
 
 model Payment {
-  id        Int    @id @default(autoincrement())
-  amount    Int
-  userId    Int
-  reference String @unique
+  id         Int      @id @default(autoincrement())
+  amount     Float
+  method     String
+  status     String
+  reference  String?   // optional unique payment reference
+  bookingId  Int
+  booking    Booking  @relation(fields: [bookingId], references: [id])
 }
 
 model Review {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   propertyId Int
   userId     Int
   rating     Int
   comment    String?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
 
   property Property @relation(fields: [propertyId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
