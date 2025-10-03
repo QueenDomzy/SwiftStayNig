@@ -6,21 +6,19 @@ import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 const router = Router();
 
-// Utility to exclude password before sending user object
-function excludePassword(user: any) {
-  const { password, ...rest } = user;
-  return rest;
-}
-
-// ========================
-// User Registration
-// ========================
+// User registration
 router.post("/register", async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role, full_name } = req.body;
 
     if (!email || !password || !role) {
       res.status(400).json({ error: "Email, password, and role are required" });
+      return;
+    }
+
+    // If your schema requires full_name, enforce it
+    if (!full_name) {
+      res.status(400).json({ error: "Full name is required" });
       return;
     }
 
@@ -33,19 +31,17 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
     const hashed = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
-      data: { email, password: hashed, role },
+      data: { email, password: hashed, role, full_name },
     });
 
-    res.status(201).json(excludePassword(user));
-  } catch (err: any) {
-    console.error("Registration error:", err.message);
+    res.json(user);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Failed to register user" });
   }
 });
 
-// ========================
-// User Login
-// ========================
+// User login
 router.post("/login", async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -56,6 +52,7 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
+
     if (!user || !user.password) {
       res.status(401).json({ error: "Invalid credentials" });
       return;
@@ -67,21 +64,15 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Fail-safe: JWT secret must be set in production
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      console.warn("⚠️ JWT_SECRET not set. Using fallback for development only.");
-    }
-
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      secret || "dev_fallback_secret",
+      process.env.JWT_SECRET || "default_secret",
       { expiresIn: "7d" }
     );
 
-    res.json({ token, user: excludePassword(user) });
-  } catch (err: any) {
-    console.error("Login error:", err.message);
+    res.json({ token, user });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Login failed" });
   }
 });
