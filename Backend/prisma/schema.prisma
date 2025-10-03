@@ -46,9 +46,9 @@ model Booking {
   status     String    @default("pending") // pending, confirmed, cancelled
   createdAt  DateTime  @default(now())
 
-  property Property   @relation(fields: [propertyId], references: [id])
-  user     User       @relation(fields: [userId], references: [id])
-  payments Payment[]  // One-to-many: a booking can have many payments
+  property  Property  @relation(fields: [propertyId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  payments  Payment[] // one-to-many relation
 }
 
 model Payment {
@@ -58,36 +58,6 @@ model Payment {
   bookingId Int
 
   booking   Booking  @relation(fields: [bookingId], references: [id])
-}
-
-model Review {
-  id         Int      @id @default(autoincrement())
-  propertyId Int
-  userId     Int
-  rating     Int
-  comment    String?
-  createdAt  DateTime @default(now())
-
-  property Property @relation(fields: [propertyId], references: [id])
-  user     User     @relation(fields: [userId], references: [id])
-}  createdAt  DateTime @default(now())
-
-  property Property @relation(fields: [propertyId], references: [id])
-  user     User     @relation(fields: [userId], references: [id])
-  payment  Payment?
-}
-
-model Payment {
-  id        Int     @id @default(autoincrement())
-  amount    Float
-  bookingId Int
-  booking   Booking @relation(fields: [bookingId], references: [id])
-}
-
-model Booking {
-  id       Int       @id @default(autoincrement())
-  date     DateTime
-  payments Payment[]
 }
 
 model Review {
