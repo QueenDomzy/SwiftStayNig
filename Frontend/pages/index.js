@@ -62,8 +62,8 @@ export default function Home({ properties }) {
 
 // Fetch properties from your backend API
 export async function getServerSideProps() {
-  const res = await fetch('https://your-backend.com/api/properties'); // Replace with your API URL
-  const properties = await res.json();
+  const res = await fetch('https://swiftstaynigeria-ua1e.onrender.com/api/properties'); // Replace with your API URL
+  const properties = await res.json();    
 
   return {
     props: {
