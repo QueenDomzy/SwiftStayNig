@@ -1,61 +1,67 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = Router();
 
-/**
- * Create a new payment
- * POST /payments
- */
-router.post("/", async (req: Request, res: Response): Promise<void> => {
+// Record a payment
+router.post("/", async (req, res) => {
   try {
     const { bookingId, provider, amount, reference } = req.body;
 
-    // ✅ Validate required fields
-    if (!bookingId || !provider || !amount) {
-      res.status(400).json({ error: "bookingId, provider, and amount are required" });
-      return;
+    // ✅ Ensure bookingId is an integer
+    const parsedBookingId = Number(bookingId);
+
+    if (isNaN(parsedBookingId)) {
+      return res.status(400).json({ error: "Invalid bookingId" });
     }
 
     // ✅ Check if booking exists
-    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    const booking = await prisma.booking.findUnique({
+      where: { id: parsedBookingId },
+    });
+
     if (!booking) {
-      res.status(404).json({ error: "Booking not found" });
-      return;
+      return res.status(404).json({ error: "Booking not found" });
     }
 
     // ✅ Create payment
     const payment = await prisma.payment.create({
       data: {
-        bookingId,
-        method: provider,   // 👈 map provider → method
-        amount,
-        reference: reference || null,
-        status: "pending",
+        bookingId: parsedBookingId,
+        method: provider,   // mapping provider → method
+        amount: Number(amount),
+        reference,
+        status: "completed",  // mark payment as successful
       },
     });
 
-    res.status(201).json(payment);
+    // ✅ Update booking status after payment
+    await prisma.booking.update({
+      where: { id: parsedBookingId },
+      data: { status: "confirmed" },
+    });
+
+    res.status(201).json({
+      message: "Payment recorded and booking confirmed",
+      payment,
+    });
   } catch (err) {
     console.error("Payment error:", err);
     res.status(500).json({ error: "Payment failed" });
   }
 });
 
-/**
- * Get all payments
- * GET /payments
- */
-router.get("/", async (_req: Request, res: Response): Promise<void> => {
+// Get all payments
+router.get("/", async (req, res) => {
   try {
     const payments = await prisma.payment.findMany({
-      include: { booking: true }, // 👈 includes booking info
+      include: { booking: true },
     });
     res.json(payments);
   } catch (err) {
     console.error("Fetch payments error:", err);
-    res.status(500).json({ error: "Failed to fetch payments" });
+    res.status(500).json({ error: "Could not fetch payments" });
   }
 });
 
