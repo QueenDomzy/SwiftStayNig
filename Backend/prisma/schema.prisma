@@ -43,6 +43,7 @@ model Booking {
   checkIn    DateTime
   checkOut   DateTime
   totalPrice Float
+  commission Float?    // NEW: optional commission field
   status     String    @default("pending") // pending, confirmed, cancelled
   createdAt  DateTime  @default(now())
 
@@ -54,6 +55,7 @@ model Booking {
 model Payment {
   id        Int      @id @default(autoincrement())
   amount    Float
+  provider  String?  // NEW: optional provider field (Paystack, Stripe, etc.)
   createdAt DateTime @default(now())
   bookingId Int
 
