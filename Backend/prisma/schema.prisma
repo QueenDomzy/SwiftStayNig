@@ -43,6 +43,7 @@ model Booking {
   checkIn    DateTime
   checkOut   DateTime
   totalPrice Float
+  commission Float?    // optional commission field
   status     String    @default("pending") // pending, confirmed, cancelled
   createdAt  DateTime  @default(now())
 
@@ -55,6 +56,7 @@ model Payment {
   id         Int      @id @default(autoincrement())
   amount     Float
   method     String
+  provider   String?   // e.g. Paystack, Flutterwave
   status     String
   reference  String?   // optional unique payment reference
   bookingId  Int
