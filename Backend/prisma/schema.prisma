@@ -8,57 +8,69 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
+  id        Int      @id @default(autoincrement())
+  full_name String
+  email     String   @unique
+  phone     String?
   password  String
-  role      String
-  createdAt DateTime  @default(now())
+  role      String   @default("guest") // guest, owner, admin
+  createdAt DateTime @default(now())
 
-  // Relations
   properties Property[]
   bookings   Booking[]
+  reviews    Review[]
 }
 
 model Property {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
+  ownerId     Int
   name        String
+  description String?
   location    String
   price       Float
-  description String
   images      String[]
-  ownerId     Int
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 
-  // Relations
-  owner    User      @relation(fields: [ownerId], references: [id])
+  owner   User   @relation(fields: [ownerId], references: [id])
   bookings Booking[]
+  reviews  Review[]
 }
 
 model Booking {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  propertyId  Int
-  checkIn     DateTime
-  checkOut    DateTime
-  status      String    @default("pending")
-  totalPrice  Float
-  commission  Float
-  createdAt   DateTime  @default(now())
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  userId     Int
+  checkIn    DateTime
+  checkOut   DateTime
+  totalPrice Float
+  status     String   @default("pending") // pending, confirmed, cancelled
+  createdAt  DateTime @default(now())
 
-  // Relations
-  user      User      @relation(fields: [userId], references: [id])
-  property  Property  @relation(fields: [propertyId], references: [id])
-  payments  Payment[]   // 👈 Correct plural relation
+  property Property @relation(fields: [propertyId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  payment  Payment?
 }
 
 model Payment {
-  id         Int      @id @default(autoincrement())
-  bookingId  Int
-  provider   String
-  amount     Float
-  status     String    @default("pending")
-  reference  String
-  createdAt  DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  bookingId     Int
+  amount        Float
+  method        String
+  status        String   @default("pending") // pending, completed, failed
+  transactionId String?
+  createdAt     DateTime @default(now())
 
   booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  userId     Int
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 }
