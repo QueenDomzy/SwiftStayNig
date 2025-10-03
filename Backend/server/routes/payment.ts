@@ -10,8 +10,14 @@ router.post("/", async (req, res) => {
     const { bookingId, provider, amount, reference } = req.body;
 
     const payment = await prisma.payment.create({
-      data: { bookingId, provider, amount, reference, status: "completed" },
-    });
+  data: {
+    bookingId,
+    method: provider,  // 👈 map provider → method
+    amount,
+    reference,
+    status: "pending",
+  },
+});
 
     res.json(payment);
   } catch (err) {
