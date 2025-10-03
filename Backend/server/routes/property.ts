@@ -1,28 +1,30 @@
-import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import propertyRoutes from "./routes/property.js";
 
-const prisma = new PrismaClient();
-const router = Router();
+const app = express();
 
-// Add property
-router.post("/", async (req, res) => {
-  try {
-    const { name, location, price, description, images, ownerId } = req.body;
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
 
-    const property = await prisma.property.create({
-      data: { name, location, price, description, images, ownerId },
-    });
+// API routes
+app.use("/api/properties", propertyRoutes);
 
-    res.json(property);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to create property" });
-  }
+// Health check (optional)
+app.get("/", (req, res) => {
+  res.json({ message: "SwiftStay Backend API is running 🚀" });
 });
 
-// Get all properties
-router.get("/", async (req, res) => {
-  const properties = await prisma.property.findMany({ include: { owner: true } });
-  res.json(properties);
+// Error handler (optional but useful)
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
 });
 
-export default router;
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
