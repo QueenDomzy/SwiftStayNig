@@ -53,13 +53,10 @@ model Booking {
 }
 
 model Payment {
-  id        Int      @id @default(autoincrement())
-  amount    Float
-  provider  String?  // NEW: optional provider field (Paystack, Stripe, etc.)
-  createdAt DateTime @default(now())
-  bookingId Int
-
-  booking   Booking  @relation(fields: [bookingId], references: [id])
+  id        Int    @id @default(autoincrement())
+  amount    Int
+  userId    Int
+  reference String @unique
 }
 
 model Review {
