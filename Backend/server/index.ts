@@ -20,11 +20,11 @@ app.get("/", (req, res) => {
   res.json({ message: "SwiftStay Backend running ✅" });
 });
 
-// Routes
-app.use("/auth", authRoutes);
-app.use("/properties", propertyRoutes);
-app.use("/bookings", bookingRoutes);
-app.use("/payments", paymentRoutes);
+// Routes (all prefixed with /api)
+app.use("/api/auth", authRoutes);
+app.use("/api/properties", propertyRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/payments", paymentRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
