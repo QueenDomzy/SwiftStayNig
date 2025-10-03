@@ -6,7 +6,15 @@ import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 const router = Router();
 
-// User registration
+// Utility to exclude password before sending user object
+function excludePassword(user: any) {
+  const { password, ...rest } = user;
+  return rest;
+}
+
+// ========================
+// User Registration
+// ========================
 router.post("/register", async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, role } = req.body;
@@ -28,14 +36,16 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
       data: { email, password: hashed, role },
     });
 
-    res.json(user);
-  } catch (err) {
-    console.error(err);
+    res.status(201).json(excludePassword(user));
+  } catch (err: any) {
+    console.error("Registration error:", err.message);
     res.status(500).json({ error: "Failed to register user" });
   }
 });
 
-// User login
+// ========================
+// User Login
+// ========================
 router.post("/login", async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -46,7 +56,6 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
-
     if (!user || !user.password) {
       res.status(401).json({ error: "Invalid credentials" });
       return;
@@ -58,15 +67,21 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Fail-safe: JWT secret must be set in production
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.warn("⚠️ JWT_SECRET not set. Using fallback for development only.");
+    }
+
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET || "default_secret", // fallback avoids TS error
+      secret || "dev_fallback_secret",
       { expiresIn: "7d" }
     );
 
-    res.json({ token, user });
-  } catch (err) {
-    console.error(err);
+    res.json({ token, user: excludePassword(user) });
+  } catch (err: any) {
+    console.error("Login error:", err.message);
     res.status(500).json({ error: "Login failed" });
   }
 });
