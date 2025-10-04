@@ -10,22 +10,27 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(cors());
+// 🟢 Enable CORS (allow frontend to access backend)
+app.use(cors({
+  origin: '*', // You can change this to your frontend URL for better security
+}));
+
+// 🟢 Parse JSON request bodies
 app.use(bodyParser.json());
 
-// Firebase Admin init
+// 🟢 Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.applicationDefault()
+    credential: admin.credential.applicationDefault(),
   });
 }
 
-// Health check
+// 🟢 Health check route
 app.get('/', (req, res) => {
   res.json({ message: 'SwiftStay Backend running ✅' });
 });
 
-// JWT Middleware
+// 🟢 JWT Middleware
 function authenticateJWT(req, res, next) {
   const authHeader = req.headers.authorization;
   if (authHeader) {
@@ -40,7 +45,7 @@ function authenticateJWT(req, res, next) {
   }
 }
 
-// Firebase Auth Middleware
+// 🟢 Firebase Auth Middleware
 async function authenticateFirebase(req, res, next) {
   const idToken = req.headers.authorization?.split(' ')[1];
   if (!idToken) return res.sendStatus(401);
@@ -53,16 +58,17 @@ async function authenticateFirebase(req, res, next) {
   }
 }
 
-// Properties route
+// 🟢 Properties route (fetch all properties from Prisma)
 app.get('/properties', async (req, res) => {
   try {
     const properties = await prisma.property.findMany();
     res.json(properties);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching properties:', error);
     res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
+// 🟢 Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 SwiftStay Backend running on port ${PORT}`));
