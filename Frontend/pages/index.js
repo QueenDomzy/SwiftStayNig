@@ -25,7 +25,7 @@ export async function getServerSideProps() {
   let error = null;
 
   try {
-    const res = await fetch(apiUrl);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
     const text = await res.text();
 
     if (!text) {
