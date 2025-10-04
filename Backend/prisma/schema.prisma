@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://swiftstaynigeria_user:ChTyTXQX6mfEl6VhuH8BLtQyPKDlQ6kK@dpg-d3f7uafdiees73ctlfsg-a/swiftstaynigeria"
+  url      = database url
 }
 
 model User {
