@@ -10,9 +10,9 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 
-// 🟢 Enable CORS (allow frontend to access backend)
+// 🟢 Enable CORS
 app.use(cors({
-  origin: '*', // You can change this to your frontend URL for better security
+  origin: '*', // You can later restrict this to your frontend URL
 }));
 
 // 🟢 Parse JSON request bodies
@@ -58,7 +58,7 @@ async function authenticateFirebase(req, res, next) {
   }
 }
 
-// 🟢 Properties route 
+// 🟢 Properties Routes
 app.get('/properties', async (req, res) => {
   try {
     const properties = await prisma.property.findMany();
@@ -69,7 +69,6 @@ app.get('/properties', async (req, res) => {
   }
 });
 
-// Optional: GET single property by ID
 app.get('/properties/:id', async (req, res) => {
   try {
     const property = await prisma.property.findUnique({
