@@ -1,73 +1,49 @@
-import Link from 'next/link';
-import SearchBar from '../components/SearchBar';
-import PropertyCard from '../components/PropertyCard';
+// pages/index.js (or your fetch function)
+import { useEffect, useState } from 'react';
 
-export default function Home({ properties }) {
+export default function Home() {
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchProperties() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
+        const text = await res.text(); // Read response as text first
+
+        if (!text) {
+          setProperties([]); // Empty array if response is empty
+        } else {
+          setProperties(JSON.parse(text)); // Parse JSON if valid
+        }
+      } catch (err) {
+        console.error('Failed to fetch properties:', err);
+        setError('Could not load properties at the moment.');
+        setProperties([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProperties();
+  }, []);
+
+  if (loading) return <p>Loading properties...</p>;
+  if (error) return <p>{error}</p>;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow p-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-blue-600">SwiftStay Nigeria</h1>
-        <nav>
-          <Link href="/properties" className="mr-4">Explore</Link>
-          <Link href="/auth/login">Login</Link>
-        </nav>
-      </header>
-
-      {/* Hero Section */}
-      <main className="p-8">
-        <section className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-blue-600 mb-4">
-            Welcome to SwiftStay Nigeria
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Book hotels and short stays seamlessly
-          </p>
-          <div className="flex justify-center gap-4">
-            <Link
-              href="/properties"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
-            >
-              Book a Stay
-            </Link>
-            <Link
-              href="/signup"
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg shadow hover:bg-gray-300"
-            >
-              Get Started
-            </Link>
-          </div>
-        </section>
-
-        {/* SearchBar */}
-        <SearchBar />
-
-        {/* Dynamic Property Listings */}
-        {properties.length > 0 && (
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            {properties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                name={property.name}
-                price={property.price}
-                location={property.location}
-              />
-            ))}
-          </section>
-        )}
-      </main>
+    <div>
+      <h1>Properties</h1>
+      {properties.length === 0 ? (
+        <p>No properties available.</p>
+      ) : (
+        <ul>
+          {properties.map((p) => (
+            <li key={p.id}>{p.name}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
-}
-
-// Fetch properties from your backend API
-export async function getServerSideProps() {
-  const res = await fetch('https://swiftstaynigeria-ua1e.onrender.com/api/properties'); // Replace with your API URL
-  const properties = await res.json();    
-
-  return {
-    props: {
-      properties,
-    },
-  };
-}
+    
