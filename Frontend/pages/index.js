@@ -10,12 +10,21 @@ export default function Home() {
     async function fetchProperties() {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
-        const text = await res.text(); // Read response as text first
+        const text = await res.text();
+
+        console.log('Backend response:', text); // For Render logs
 
         if (!text) {
-          setProperties([]); // Empty array if response is empty
+          setProperties([]);
+          console.warn('Empty response from backend.');
         } else {
-          setProperties(JSON.parse(text)); // Parse JSON if valid
+          try {
+            setProperties(JSON.parse(text));
+          } catch (parseErr) {
+            console.error('Failed to parse JSON:', parseErr);
+            setProperties([]);
+            setError('Received invalid data from server.');
+          }
         }
       } catch (err) {
         console.error('Failed to fetch properties:', err);
@@ -35,6 +44,18 @@ export default function Home() {
   return (
     <div>
       <h1>Properties</h1>
+      {properties.length === 0 ? (
+        <p>No properties available.</p>
+      ) : (
+        <ul>
+          {properties.map((p) => (
+            <li key={p.id}>{p.name}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+            }      <h1>Properties</h1>
       {properties.length === 0 ? (
         <p>No properties available.</p>
       ) : (
