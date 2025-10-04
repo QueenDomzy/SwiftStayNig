@@ -58,14 +58,32 @@ async function authenticateFirebase(req, res, next) {
   }
 }
 
-// 🟢 Properties route (fetch all properties from Prisma)
+// 🟢 Properties route 
 app.get('/properties', async (req, res) => {
   try {
     const properties = await prisma.property.findMany();
     res.json(properties);
   } catch (error) {
-    console.error('Error fetching properties:', error);
-    res.status(500).json({ error: 'Something went wrong' });
+    console.error("Error fetching properties:", error);
+    res.status(500).json({ error: 'Failed to fetch properties' });
+  }
+});
+
+// Optional: GET single property by ID
+app.get('/properties/:id', async (req, res) => {
+  try {
+    const property = await prisma.property.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+
+    if (!property) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+
+    res.json(property);
+  } catch (error) {
+    console.error("Error fetching property:", error);
+    res.status(500).json({ error: 'Failed to fetch property' });
   }
 });
 
