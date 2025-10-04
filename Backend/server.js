@@ -53,10 +53,15 @@ async function authenticateFirebase(req, res, next) {
   }
 }
 
-// Example Properties route
+// Properties route
 app.get('/properties', async (req, res) => {
-  const props = await prisma.property.findMany();
-  res.json(props);
+  try {
+    const properties = await prisma.property.findMany();
+    res.json(properties);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
