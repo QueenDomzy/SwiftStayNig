@@ -3,10 +3,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 
-import authRoutes from "./routes/auth";
-import propertyRoutes from "./routes/property";
-import bookingRoutes from "./routes/booking";
-import paymentRoutes from "./routes/payment";
+import authRoutes from "./routes/auth.js";
+import propertyRoutes from "./routes/property.js";
+import bookingRoutes from "./routes/booking.js";
+import paymentRoutes from "./routes/payment.js";
 
 dotenv.config();
 const app = express();
@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
   res.json({ message: "SwiftStay Backend running ✅" });
 });
 
-// Routes (all prefixed with /api)
+// Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/bookings", bookingRoutes);
