@@ -1,4 +1,4 @@
-// pages/index.js (or your fetch function)
+// pages/index.js
 import { useEffect, useState } from 'react';
 
 export default function Home() {
@@ -46,4 +46,4 @@ export default function Home() {
       )}
     </div>
   );
-    
+}
