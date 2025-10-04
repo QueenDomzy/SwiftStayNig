@@ -12,7 +12,7 @@ export default function Home() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
         const text = await res.text();
 
-        console.log('Backend response:', text); // For Render logs
+        console.log('Backend response:', text); // For debugging
 
         if (!text) {
           setProperties([]);
@@ -53,18 +53,3 @@ export default function Home() {
           ))}
         </ul>
       )}
-    </div>
-  );
-            }      <h1>Properties</h1>
-      {properties.length === 0 ? (
-        <p>No properties available.</p>
-      ) : (
-        <ul>
-          {properties.map((p) => (
-            <li key={p.id}>{p.name}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
