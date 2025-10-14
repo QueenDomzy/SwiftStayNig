@@ -1,4 +1,7 @@
-// pages/index.js
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/effect-fade";
+import { Autoplay, EffectFade } from "swiper/modules";// pages/index.js
 export default function Home({ properties, error }) {
   if (error) return <p>{error}</p>;
 
