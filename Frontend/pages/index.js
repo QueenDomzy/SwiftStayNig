@@ -1,5 +1,3 @@
-// pages/index.js
-
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -18,12 +16,30 @@ export default function Home({ properties, error }) {
 
   return (
     <main className="relative w-full">
-      {/* Hero Section with Swiper */}
+      {/* ✅ SwiftStay Logo Overlay */}
+      <div className="absolute top-6 left-8 z-50 flex items-center space-x-2">
+        <img
+          src="/logo-swiftstay.png"
+          alt="SwiftStay Nigeria Logo"
+          className="h-14 w-auto drop-shadow-lg animate-glow"
+        />
+      </div>
+
+      {/* ✅ Hero Section with Swiper */}
       <Swiper
         modules={[Autoplay, EffectFade]}
         autoplay={{ delay: 4500 }}
         effect="fade"
         loop
+        onSlideChange={() => {
+          // Restart slogan fade-in animation on slide change
+          const slogan = document.querySelector(".slogan");
+          if (slogan) {
+            slogan.classList.remove("fade-in");
+            void slogan.offsetWidth; // reflow
+            slogan.classList.add("fade-in");
+          }
+        }}
       >
         {images.map((src, i) => (
           <SwiperSlide key={i}>
@@ -36,17 +52,17 @@ export default function Home({ properties, error }) {
         ))}
       </Swiper>
 
-      {/* Overlay Title */}
+      {/* ✅ Animated Slogan Overlay */}
       <div className="absolute inset-0 flex items-center justify-center text-center">
-        <h1 className="text-4xl md:text-6xl font-playfair text-gold drop-shadow-lg">
+        <h1 className="slogan fade-in text-4xl md:text-6xl font-playfair text-gold drop-shadow-lg px-4">
           SwiftStay Nigeria: Connecting Nigeria — One Stay at a Time
         </h1>
       </div>
 
-      {/* Property Listings Section */}
+      {/* ✅ Property Listings Section */}
       <section className="mt-10 px-6">
         <h2 className="text-2xl font-bold mb-4">Available Properties</h2>
-        {properties.length === 0 ? (
+        {properties?.length === 0 ? (
           <p>No properties available.</p>
         ) : (
           <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -66,7 +82,7 @@ export default function Home({ properties, error }) {
   );
 }
 
-// ✅ Fetch data server-side (keep your original logic)
+// ✅ Server-side data fetch
 export async function getServerSideProps() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL + "/properties";
   let properties = [];
@@ -91,13 +107,9 @@ export async function getServerSideProps() {
   } catch (err) {
     console.error("Failed to fetch properties:", err);
     error = "Could not load properties at the moment.";
-    properties = [];
   }
 
   return {
-    props: {
-      properties,
-      error,
-    },
+    props: { properties, error },
   };
-    }
+            }
