@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
-    "rootDir": "./",
-    "outDir": "./dist",
+    "rootDir": "./server",         // Only compile server source files
+    "outDir": "./dist/server",     // Output JS exactly to dist/server
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -15,4 +15,4 @@
   },
   "include": ["server/**/*.ts", "prisma/**/*.ts"],
   "exclude": ["node_modules", "dist"]
-}
+  }
