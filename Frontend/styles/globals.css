@@ -1,44 +1,48 @@
 /* ---------------------------------
-   Tailwind Core Imports
+   🌟 SwiftStay Global Styles
 ---------------------------------- */
+
+/* Tailwind Core Imports */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ---------------------------------
-   Global Styles
+   ✨ Global Styles
 ---------------------------------- */
 body {
   font-family: 'Inter', sans-serif;
   background-color: #fafafa; /* Soft gold-tinted white */
   color: #111; /* Deep text for readability */
+  scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
 }
 
 /* ---------------------------------
-   Swiper Customizations
+   🖼️ Swiper Customizations
 ---------------------------------- */
 
 /* Rounded Swiper edges */
 .swiper {
-  border-radius: 1.5rem; /* matches Tailwind's rounded-2xl */
-  overflow: hidden; /* keeps image corners neat */
+  border-radius: 1.5rem; /* Tailwind's rounded-2xl equivalent */
+  overflow: hidden;
 }
 
-/* Smooth image transition */
+/* Smooth transition and luxury zoom */
 .swiper-slide img {
-  transition: transform 0.8s ease-in-out;
+  transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
 }
 
-/* Gentle zoom for luxury feel */
 .swiper-slide-active img {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 /* ---------------------------------
-   SwiftStay Brand Animations
+   ✨ SwiftStay Brand Animations
 ---------------------------------- */
 
-/* ✨ Fade-in slogan animation */
+/* Fade-in for hero slogan */
 .fade-in {
   opacity: 0;
   transform: translateY(20px);
@@ -48,7 +52,7 @@ body {
 @keyframes fadeInUp {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(25px);
   }
   100% {
     opacity: 1;
@@ -56,21 +60,47 @@ body {
   }
 }
 
-/* ✨ Gold text style for SwiftStay brand */
+/* Gold text */
 .text-gold {
-  color: #d4af37; /* Elegant metallic gold */
+  color: #d4af37;
 }
 
-/* ✨ Glowing logo animation */
+/* Glowing logo animation */
 .animate-glow {
   animation: glowPulse 3s ease-in-out infinite;
 }
 
 @keyframes glowPulse {
   0%, 100% {
-    filter: drop-shadow(0 0 5px #d4af37);
+    filter: drop-shadow(0 0 6px #d4af37);
   }
   50% {
     filter: drop-shadow(0 0 15px #ffd700);
   }
-  }
+}
+
+/* ---------------------------------
+   💼 Book Now Button
+---------------------------------- */
+.book-now-btn {
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px; /* fully rounded */
+  font-weight: 600;
+  font-size: 1.125rem; /* text-lg */
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+  transition: all 0.3s ease;
+  animation: fadeInUp 1.8s ease-out forwards;
+}
+
+.book-now-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+}
+
+/* Optional focus ring for accessibility */
+.book-now-btn:focus {
+  outline: 2px solid #b8860b;
+  outline-offset: 3px;
+}
