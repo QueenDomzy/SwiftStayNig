@@ -1,3 +1,5 @@
+"use client";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -12,7 +14,7 @@ export default function Home({ properties, error }) {
     "/images/margaret-umahi-market.jpg",
   ];
 
-  if (error) return <p>{error}</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <main className="relative w-full">
@@ -36,7 +38,7 @@ export default function Home({ properties, error }) {
           const slogan = document.querySelector(".slogan");
           if (slogan) {
             slogan.classList.remove("fade-in");
-            void slogan.offsetWidth; // reflow
+            void slogan.offsetWidth; // Reflow to restart animation
             slogan.classList.add("fade-in");
           }
         }}
@@ -52,27 +54,37 @@ export default function Home({ properties, error }) {
         ))}
       </Swiper>
 
-      {/* ✅ Animated Slogan Overlay */}
-      <div className="absolute inset-0 flex items-center justify-center text-center">
-        <h1 className="slogan fade-in text-4xl md:text-6xl font-playfair text-gold drop-shadow-lg px-4">
+      {/* ✅ Animated Slogan + Button Overlay */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6 px-4">
+        <h1 className="slogan fade-in text-4xl md:text-6xl font-playfair text-gold drop-shadow-lg">
           SwiftStay Nigeria: Connecting Nigeria — One Stay at a Time
         </h1>
+
+        <button
+          onClick={() => (window.location.href = "/booking")}
+          className="book-now-btn fade-in"
+        >
+          Book Now
+        </button>
       </div>
 
       {/* ✅ Property Listings Section */}
-      <section className="mt-10 px-6">
-        <h2 className="text-2xl font-bold mb-4">Available Properties</h2>
+      <section className="mt-16 px-6 pb-20">
+        <h2 className="text-3xl font-bold mb-6 text-center text-gold">
+          Available Properties
+        </h2>
+
         {properties?.length === 0 ? (
-          <p>No properties available.</p>
+          <p className="text-center text-gray-600">No properties available.</p>
         ) : (
-          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {properties.map((p) => (
               <li
                 key={p.id}
-                className="border rounded-xl shadow-lg p-4 hover:shadow-2xl transition"
+                className="border border-gray-200 rounded-xl shadow-lg p-4 hover:shadow-2xl transition transform hover:-translate-y-1 bg-white/80 backdrop-blur-sm"
               >
-                <h3 className="font-semibold text-lg mb-2">{p.name}</h3>
-                <p>{p.location}</p>
+                <h3 className="font-semibold text-xl mb-2 text-gray-900">{p.name}</h3>
+                <p className="text-gray-600">{p.location}</p>
               </li>
             ))}
           </ul>
@@ -82,7 +94,7 @@ export default function Home({ properties, error }) {
   );
 }
 
-// ✅ Server-side data fetch
+/* ✅ Server-side Data Fetch */
 export async function getServerSideProps() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL + "/properties";
   let properties = [];
@@ -112,4 +124,4 @@ export async function getServerSideProps() {
   return {
     props: { properties, error },
   };
-            }
+    }
