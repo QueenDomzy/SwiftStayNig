@@ -1,15 +1,22 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+// Neutral Firebase Config Replacement
+// This mock preserves structure without any Firebase dependency.
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+export const auth = {
+  currentUser: null,
+  // Mock sign-in, sign-out, and user state handlers for future integration
+  signIn: async () => {
+    console.warn("Firebase Auth removed — replace with your API auth logic.");
+  },
+  signOut: async () => {
+    console.warn("Firebase Auth removed — replace with your API auth logic.");
+  },
+  onAuthStateChanged: (callback) => {
+    console.warn("Firebase listener removed — implement custom user session tracking.");
+    callback(null);
+    return () => {};
+  },
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export default app;
+export default {
+  initialize: () => console.log("Firebase removed — ready for custom backend integration."),
+};
