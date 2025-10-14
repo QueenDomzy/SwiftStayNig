@@ -10,14 +10,11 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the code
+# Copy the rest of the project (including .env)
 COPY . .
-
-# Build backend
-RUN npm run build
 
 # Expose port
 EXPOSE 3000
 
-# Start backend
-CMD ["npm", "start"]
+# Build & start at runtime so DATABASE_URL is available
+CMD ["sh", "-c", "npm run build && npm start"]
