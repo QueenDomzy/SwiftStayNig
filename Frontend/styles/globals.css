@@ -1,8 +1,31 @@
+/* Import Tailwind core layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* optional custom styles */
+/* ---------- Global Styles ---------- */
+
+/* Brand body style */
 body {
   font-family: 'Inter', sans-serif;
+  background-color: #fafafa; /* Light gold-tinted background */
+  color: #111; /* Deep text color for readability */
+}
+
+/* ---------- Swiper Customizations ---------- */
+
+/* Rounded Swiper edges */
+.swiper {
+  border-radius: 1.5rem; /* equals rounded-2xl in Tailwind */
+  overflow: hidden;      /* ensures images don’t spill outside corners */
+}
+
+/* Smooth image transition between slides */
+.swiper-slide img {
+  transition: transform 0.8s ease-in-out;
+}
+
+/* Gentle zoom on active slide for luxury feel */
+.swiper-slide-active img {
+  transform: scale(1.03);
 }
