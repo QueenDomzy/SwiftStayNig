@@ -1,31 +1,76 @@
-/* Import Tailwind core layers */
+/* ---------------------------------
+   Tailwind Core Imports
+---------------------------------- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---------- Global Styles ---------- */
-
-/* Brand body style */
+/* ---------------------------------
+   Global Styles
+---------------------------------- */
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #fafafa; /* Light gold-tinted background */
-  color: #111; /* Deep text color for readability */
+  background-color: #fafafa; /* Soft gold-tinted white */
+  color: #111; /* Deep text for readability */
 }
 
-/* ---------- Swiper Customizations ---------- */
+/* ---------------------------------
+   Swiper Customizations
+---------------------------------- */
 
 /* Rounded Swiper edges */
 .swiper {
-  border-radius: 1.5rem; /* equals rounded-2xl in Tailwind */
-  overflow: hidden;      /* ensures images don’t spill outside corners */
+  border-radius: 1.5rem; /* matches Tailwind's rounded-2xl */
+  overflow: hidden; /* keeps image corners neat */
 }
 
-/* Smooth image transition between slides */
+/* Smooth image transition */
 .swiper-slide img {
   transition: transform 0.8s ease-in-out;
 }
 
-/* Gentle zoom on active slide for luxury feel */
+/* Gentle zoom for luxury feel */
 .swiper-slide-active img {
   transform: scale(1.03);
 }
+
+/* ---------------------------------
+   SwiftStay Brand Animations
+---------------------------------- */
+
+/* ✨ Fade-in slogan animation */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ✨ Gold text style for SwiftStay brand */
+.text-gold {
+  color: #d4af37; /* Elegant metallic gold */
+}
+
+/* ✨ Glowing logo animation */
+.animate-glow {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px #d4af37);
+  }
+  50% {
+    filter: drop-shadow(0 0 15px #ffd700);
+  }
+  }
