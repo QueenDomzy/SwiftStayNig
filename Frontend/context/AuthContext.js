@@ -1,33 +1,49 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { app } from "../lib/firebase";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // Current logged-in user
   const [loading, setLoading] = useState(true);
 
-  const auth = getAuth(app);
-
+  // Simulate checking for an existing session on mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    // Replace this with actual backend call if you have session tokens
+    const fetchCurrentUser = async () => {
+      console.warn("Firebase removed — implement your API call to fetch current user");
+      setUser(null); // default: no user
       setLoading(false);
-    });
-    return () => unsubscribe();
-  }, [auth]);
+    };
+    fetchCurrentUser();
+  }, []);
 
-  // Helpers
-  const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
-  const signup = (email, password) => createUserWithEmailAndPassword(auth, email, password);
-  const logout = () => signOut(auth);
+  // Mock login function
+  const login = async (email, password) => {
+    console.warn("Firebase removed — replace with API login call");
+    // Example: set a dummy user
+    setUser({ email, name: "Demo User" });
+    return { success: true };
+  };
+
+  // Mock signup function
+  const signup = async (email, password, name) => {
+    console.warn("Firebase removed — replace with API signup call");
+    setUser({ email, name: name || "New User" });
+    return { success: true };
+  };
+
+  // Mock logout function
+  const logout = async () => {
+    console.warn("Firebase removed — replace with API logout call");
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
 }
 
+// Hook for easy access
 export const useAuth = () => useContext(AuthContext);
