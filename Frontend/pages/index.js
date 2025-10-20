@@ -106,7 +106,7 @@ export default function Home({ properties, error }) {
 
 // ✅ Static generation with revalidation (prevents 429 errors)
 export async function getStaticProps() {
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/properties`;
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/properties`;
   let properties = [];
   let error = null;
 
