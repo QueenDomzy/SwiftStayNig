@@ -82,7 +82,7 @@ export default function Home({ properties, error }) {
 
 // ✅ Server-side fetch for properties
 export async function getServerSideProps() {
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/properties`;
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/properties`;
   let properties = [];
   let error = null;
 
