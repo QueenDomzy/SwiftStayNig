@@ -82,7 +82,9 @@ export default function Home({ properties, error }) {
 
 // ✅ Server-side fetch for properties
 export async function getServerSideProps() {
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/properties`;
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const apiUrl = `${apiBase}/properties`;
+
   let properties = [];
   let error = null;
 
@@ -105,9 +107,6 @@ export async function getServerSideProps() {
   }
 
   return {
-    props: {
-      properties,
-      error,
-    },
+    props: { properties, error },
   };
 }
