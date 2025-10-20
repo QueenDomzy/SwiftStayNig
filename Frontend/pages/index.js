@@ -81,32 +81,22 @@ export default function Home({ properties, error }) {
 }
 
 // ✅ Server-side fetch for properties
-export async function getServerSideProps() {
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-  const apiUrl = `${apiBase}/properties`;
-
+export async function getStaticProps() {
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/properties`;
   let properties = [];
   let error = null;
 
   try {
     const res = await fetch(apiUrl);
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Server responded with ${res.status}: ${text}`);
-    }
-
+    if (!res.ok) throw new Error(`Server responded with ${res.status}`);
     properties = await res.json();
-
-    if (!Array.isArray(properties)) {
-      throw new Error("Expected an array but got something else");
-    }
   } catch (err) {
     console.error("Failed to fetch properties:", err);
-    error = err.message || "Could not load properties at the moment.";
+    error = err.message;
   }
 
   return {
     props: { properties, error },
+    revalidate: 300, // Regenerate every 5 minutes
   };
 }
