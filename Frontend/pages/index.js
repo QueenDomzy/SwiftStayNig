@@ -155,8 +155,7 @@ export async function getServerSideProps() {
           </ul>
         )}
       </section>
-    </main>
-=======
+    </main
     <div>
       <h1>Properties</h1>
       {Array.isArray(properties) && properties.length > 0 ? (
