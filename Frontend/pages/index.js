@@ -87,7 +87,15 @@ export async function getStaticProps() {
   let error = null;
 
   try {
-    const res = await fetch(apiUrl);
+    let res = await fetch(apiUrl);
+
+    // If rate limited, wait and retry once
+    if (res.status === 429) {
+      console.warn("⚠️ Rate limited — retrying after delay...");
+      await new Promise(r => setTimeout(r, 3000)); // wait 3 seconds
+      res = await fetch(apiUrl);
+    }
+
     if (!res.ok) throw new Error(`Server responded with ${res.status}`);
     properties = await res.json();
   } catch (err) {
@@ -97,6 +105,6 @@ export async function getStaticProps() {
 
   return {
     props: { properties, error },
-    revalidate: 300, // Regenerate every 5 minutes
+    revalidate: 300,
   };
 }
