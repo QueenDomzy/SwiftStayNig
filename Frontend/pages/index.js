@@ -9,7 +9,7 @@ const images = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg"];
 export default function Home({ properties, error }) {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
-  // Optional: restart slogan animation on slide change
+  // Restart slogan animation on slide change
   const restartSloganAnimation = () => {
     const slogan = document.querySelector(".slogan");
     if (slogan) {
@@ -49,7 +49,7 @@ export default function Home({ properties, error }) {
         ))}
       </Swiper>
 
-      {/* Animated Slogan Overlay + Book Now */}
+      {/* Animated Slogan Overlay + Book Now Button */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6">
         <h1 className="slogan fade-in text-4xl md:text-6xl font-playfair text-gold drop-shadow-lg px-4">
           SwiftStay Nigeria: Connecting Nigeria — One Stay at a Time
@@ -110,4 +110,4 @@ export async function getServerSideProps() {
       error,
     },
   };
-    }
+}
