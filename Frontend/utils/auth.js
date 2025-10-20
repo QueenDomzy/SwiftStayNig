@@ -1,7 +1,23 @@
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { app } from "../lib/firebase";
+// Neutral authentication placeholder (no Firebase)
 
-const auth = getAuth(app);
+export const login = async (email, password) => {
+  // Mock login for development — replace with real API later if needed
+  console.log("Mock login:", email);
+  return {
+    user: {
+      email,
+      name: "Demo User",
+    },
+  };
+};
 
-export const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
-export const signup = (email, password) => createUserWithEmailAndPassword(auth, email, password);
+export const signup = async (email, password) => {
+  // Mock signup for development
+  console.log("Mock signup:", email);
+  return {
+    user: {
+      email,
+      name: "New User",
+    },
+  };
+};

@@ -1,21 +1,8 @@
-"use client";
-
-import { useEffect } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade } from "swiper";
-import "swiper/css";
-import "swiper/css/effect-fade";
+// pages/index.js
 
 export default function Home({ properties, error }) {
-  const images = [
-    "/images/nike-lake-resort.jpg",
-    "/images/golden-tulip-agulu.jpg",
-    "/images/rockview-owerri.jpg",
-    "/images/salt-lake-abakaliki.jpg",
-    "/images/margaret-umahi-market.jpg",
-  ];
-
-  if (error) return <p>{error}</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+>>>>>>> 6ed892f (Initial commit)
 
   // Optional: restart slogan animation on slide change
   const restartSloganAnimation = () => {
@@ -28,6 +15,7 @@ export default function Home({ properties, error }) {
   };
 
   return (
+<<<<<<< HEAD
     <main className="relative w-full">
       {/* SwiftStay Logo */}
       <div className="absolute top-6 left-8 z-50 flex items-center space-x-2">
@@ -87,17 +75,36 @@ export default function Home({ properties, error }) {
         )}
       </section>
     </main>
+=======
+    <div>
+      <h1>Properties</h1>
+      {Array.isArray(properties) && properties.length > 0 ? (
+        <ul>
+          {properties.map((p) => (
+            <li key={p.id || p.name}>{p.name || "Unnamed Property"}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No properties available.</p>
+      )}
+    </div>
+>>>>>>> 6ed892f (Initial commit)
   );
 }
 
 // Server-side fetch for properties
 export async function getServerSideProps() {
+<<<<<<< HEAD
   const apiUrl = process.env.NEXT_PUBLIC_API_URL + "/properties";
+=======
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/properties`;
+>>>>>>> 6ed892f (Initial commit)
   let properties = [];
   let error = null;
 
   try {
     const res = await fetch(apiUrl);
+<<<<<<< HEAD
     const text = await res.text();
 
     if (!text) {
@@ -119,3 +126,27 @@ export async function getServerSideProps() {
 
   return { props: { properties, error } };
     }
+=======
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Server responded with ${res.status}: ${text}`);
+    }
+
+    properties = await res.json();
+    if (!Array.isArray(properties)) {
+      throw new Error("Expected an array but got something else");
+    }
+  } catch (err) {
+    console.error("Failed to fetch properties:", err);
+    error = err.message || "Could not load properties at the moment.";
+  }
+
+  return {
+    props: {
+      properties,
+      error,
+    },
+  };
+}
+>>>>>>> 6ed892f (Initial commit)

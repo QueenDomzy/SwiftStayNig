@@ -1,0 +1,17 @@
+# Node
+node_modules/
+.env
+.env.local
+dist/
+build/
+.next/
+.prisma/
+.vscode/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
