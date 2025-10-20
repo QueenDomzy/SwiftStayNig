@@ -1,7 +1,7 @@
 // pages/index.js
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
-import { useRouter } from "next/router"; // ✅ For navigation
+import { useRouter } from "next/router";
 import "swiper/css";
 import "swiper/css/effect-fade";
 
@@ -10,7 +10,6 @@ const images = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg"];
 export default function Home({ properties, error }) {
   const router = useRouter();
 
-  // Restart slogan animation on slide change
   const restartSloganAnimation = () => {
     const slogan = document.querySelector(".slogan");
     if (slogan) {
@@ -20,7 +19,6 @@ export default function Home({ properties, error }) {
     }
   };
 
-  // ✅ Handle "Book Now" click
   const handleBookNow = () => {
     router.push("/properties");
   };
@@ -42,6 +40,7 @@ export default function Home({ properties, error }) {
       <nav className="absolute top-8 right-8 z-50 flex space-x-6 text-white font-semibold drop-shadow-lg">
         <a href="/" className="hover:text-gold transition">Home</a>
         <a href="/properties" className="hover:text-gold transition">Properties</a>
+        <a href="/onboard" className="hover:text-gold transition">List Your Hotel</a>
         <a href="/login" className="hover:text-gold transition">Login</a>
         <a href="/signup" className="hover:text-gold transition">Sign Up</a>
         <a href="/dashboard" className="hover:text-gold transition">Dashboard</a>
@@ -66,14 +65,14 @@ export default function Home({ properties, error }) {
         ))}
       </Swiper>
 
-      {/* ✅ Slogan Overlay + Book Now */}
+      {/* ✅ Slogan + Book Now */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-6">
         <h1 className="slogan fade-in text-4xl md:text-6xl font-playfair text-gold drop-shadow-lg px-4">
           SwiftStay Nigeria: Connecting Nigeria — One Stay at a Time
         </h1>
         <button
           onClick={handleBookNow}
-          className="book-now-btn fade-in"
+          className="bg-gold text-black font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-yellow-500 transition fade-in"
         >
           Book Now
         </button>
@@ -121,6 +120,6 @@ export async function getStaticProps() {
 
   return {
     props: { properties, error },
-    revalidate: 300, // re-fetch every 5 minutes
+    revalidate: 300,
   };
 }
