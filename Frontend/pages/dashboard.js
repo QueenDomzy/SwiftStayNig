@@ -1,15 +1,30 @@
-import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import { generateQR } from "@/utils/generateQR";
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const [qr, setQr] = useState("");
 
-  if (loading) return <p>Loading...</p>;
-  if (!user) return <p>Please log in to access the dashboard</p>;
+  useEffect(() => {
+    // Example: dynamic QR link for hotel onboarding
+    generateQR("https://swiftstaynigeria-frontend.onrender.com/onboard?ref=hotel123")
+      .then(setQr);
+  }, []);
 
   return (
-    <div>
-      <h1>Welcome, {user.email}</h1>
-      <p>This is your dashboard.</p>
+    <div className="p-6 text-center">
+      <h1 className="text-2xl font-bold mb-4">Your Hotel QR Code</h1>
+      {qr ? (
+        <img
+          src={qr}
+          alt="Hotel QR"
+          className="mx-auto border rounded-lg shadow-md"
+        />
+      ) : (
+        <p>Generating QR...</p>
+      )}
+      <p className="mt-2 text-gray-600 text-sm">
+        Scan to onboard or share with guests
+      </p>
     </div>
   );
 }
