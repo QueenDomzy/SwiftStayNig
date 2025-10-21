@@ -4,13 +4,13 @@ import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 
 // 🧩 Route imports
-import authRoutes from "./routes/auth.js";
-import propertyRoutes from "./routes/propertyRoutes.js";
-import bookingRoutes from "./routes/bookingRoutes.js";
-import paymentRoutes from "./routes/paymentRoutes.js";
+import authRoutes from "./routes/auth";
+import propertyRoutes from "./routes/propertyRoutes";
+import bookingRoutes from "./routes/bookingRoutes";
+import paymentRoutes from "./routes/paymentRoutes";
 // (optional future routes)
-// import onboardingRoutes from "./routes/onboardingRoutes.js";
-// import aiRoutes from "./routes/aiRoutes.js";
+// import onboardingRoutes from "./routes/onboardingRoutes";
+// import aiRoutes from "./routes/aiRoutes";
 
 dotenv.config();
 
