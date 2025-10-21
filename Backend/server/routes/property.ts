@@ -1,5 +1,5 @@
 // src/routes/propertyRoutes.ts
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import rateLimit from "express-rate-limit";
 import { body, param, validationResult } from "express-validator";
@@ -17,13 +17,12 @@ const limiter = rateLimit({
 router.use(limiter);
 
 /* 🧹 Utility for error handling */
-const handleError = (res: Response, error: any, message = "Server error") => {
+const handleError = (res: Response, error: unknown, message = "Server error") => {
   console.error(message, error);
   res.status(500).json({ error: message });
 };
 
-/* ✅ Add a property (POST /api/properties)
-   Used by hotels during onboarding */
+/* ✅ Add a property (POST /api/properties) */
 router.post(
   "/",
   [
@@ -34,7 +33,7 @@ router.post(
     body("images").isArray().optional(),
     body("ownerId").isInt().optional(),
   ],
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -57,9 +56,8 @@ router.post(
   }
 );
 
-/* ✅ Get all properties (GET /api/properties)
-   Used by users on homepage or properties page */
-router.get("/", async (_req: Request, res: Response) => {
+/* ✅ Get all properties (GET /api/properties) */
+router.get("/", async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const properties = await prisma.property.findMany({
       include: { owner: true },
@@ -75,18 +73,17 @@ router.get("/", async (_req: Request, res: Response) => {
   }
 });
 
-/* ✅ Get property by ID (GET /api/properties/:id)
-   Used when a user clicks a specific property */
+/* ✅ Get property by ID (GET /api/properties/:id) */
 router.get(
   "/:id",
   [param("id").isInt().toInt()],
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const propertyId = req.params.id as unknown as number;
+    const propertyId = Number(req.params.id);
 
     try {
       const property = await prisma.property.findUnique({
@@ -105,14 +102,18 @@ router.get(
   }
 );
 
-/* 🧩 (Optional) Delete or Update property */
-router.delete("/:id", [param("id").isInt().toInt()], async (req, res) => {
-  try {
-    await prisma.property.delete({ where: { id: Number(req.params.id) } });
-    res.status(204).send();
-  } catch (error) {
-    handleError(res, error, "Failed to delete property");
+/* 🧩 Delete property */
+router.delete(
+  "/:id",
+  [param("id").isInt().toInt()],
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await prisma.property.delete({ where: { id: Number(req.params.id) } });
+      res.status(204).send();
+    } catch (error) {
+      handleError(res, error, "Failed to delete property");
+    }
   }
-});
+);
 
 export default router;
