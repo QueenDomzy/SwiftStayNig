@@ -5,19 +5,29 @@ import axios, { AxiosError } from "axios";
 dotenv.config();
 const router = express.Router();
 
+/* 🤖 Health Check Route */
+router.get("/", (req: Request, res: Response) => {
+  res.json({
+    message: "🤖 AI routes active",
+    endpoints: ["/ask", "/analyze", "/generate"],
+  });
+});
+
 /**
  * @route   POST /api/ai
  * @desc    Generate AI-based suggestions or messages
- * @access  Public or Protected
+ * @access  Public (can be secured later with authentication middleware)
  */
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const { prompt } = req.body;
+
     if (!prompt) {
-      return res.status(400).json({ message: "Prompt is required" });
+      res.status(400).json({ error: "Prompt is required." });
+      return;
     }
 
-    // Example: call an external AI API (replace with your model or logic)
+    // ✅ Example: call OpenAI’s API (replace model as needed)
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
@@ -32,20 +42,43 @@ router.post("/", async (req: Request, res: Response) => {
       }
     );
 
-    const aiReply = response.data.choices?.[0]?.message?.content || "No response";
+    const aiReply =
+      response.data?.choices?.[0]?.message?.content?.trim() ||
+      "⚠️ No response from AI model.";
 
-    res.json({ reply: aiReply });
+    res.status(200).json({
+      message: "✅ AI response generated successfully.",
+      reply: aiReply,
+    });
   } catch (error: unknown) {
-    // Narrow unknown type safely
+    console.error("AI route error:", error);
+
+    // 🧩 Handle Axios errors gracefully
     if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError<{ message?: string }>;
-      console.error("AI route error:", axiosError.response?.data || axiosError.message);
-    } else if (error instanceof Error) {
-      console.error("AI route error:", error.message);
-    } else {
-      console.error("AI route error:", error);
+      const axiosError = error as AxiosError<{ error?: { message?: string } }>;
+      const errorMessage =
+        axiosError.response?.data?.error?.message ||
+        axiosError.response?.data ||
+        axiosError.message;
+
+      res.status(502).json({
+        error: "AI API request failed.",
+        details: errorMessage,
+      });
+      return;
     }
-    res.status(500).json({ message: "AI service error" });
+
+    // 🧩 Handle generic errors
+    if (error instanceof Error) {
+      res.status(500).json({
+        error: "AI processing failed.",
+        details: error.message,
+      });
+      return;
+    }
+
+    // 🧩 Fallback
+    res.status(500).json({ error: "Unknown AI service error." });
   }
 });
 
