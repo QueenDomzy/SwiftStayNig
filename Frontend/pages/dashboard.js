@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { generateQR } from "@/utils/generateQR";
-import { useAuth } from "@/context/AuthContext";
+import generateQR from "../utils/generateQR";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Dashboard() {
   const { user } = useAuth();
