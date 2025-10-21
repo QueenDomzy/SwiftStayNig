@@ -1,11 +1,11 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = Router();
 
 // Create booking
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const { userId, propertyId, checkIn, checkOut } = req.body;
 
@@ -35,13 +35,13 @@ router.post("/", async (req, res) => {
 });
 
 // Get bookings
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     const bookings = await prisma.booking.findMany({
       include: {
         user: true,
         property: true,
-        payments: true, // ✅ FIXED (plural)
+        payments: true, // ✅ fixed plural
       },
     });
     res.json(bookings);
