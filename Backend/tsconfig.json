@@ -3,12 +3,16 @@
     "target": "ES2020",
     "module": "commonjs",
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "server",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "strict": true,
-    "types": ["node"]
+    "types": ["node", "express"],
+    "incremental": true
   },
-  "include": ["*.ts", "**/*.ts"],
+  "include": ["server/**/*.ts", "server/**/*.d.ts"],
   "exclude": ["dist", "node_modules"]
 }

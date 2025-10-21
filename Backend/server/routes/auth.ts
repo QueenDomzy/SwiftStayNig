@@ -1,38 +1,46 @@
-import express, { Request, Response } from "express";
+// server/routes/auth.ts
+import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
+import { validateBody } from "../utils/validate";
 
 const prisma = new PrismaClient();
-const router = express.Router();
+const router = Router();
 
 /* 🩵 Route Health Check */
-router.get("/", (req: Request, res: Response) => {
+router.get("/", (_req, res) => {
   res.json({
     message: "🧩 Auth routes active",
     routes: ["/register", "/login"],
   });
 });
 
+/* 🧾 Zod Schemas */
+const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  role: z.string().min(1),
+  full_name: z.string().min(1),
+});
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
 /* 🧾 User Registration */
-router.post("/register", async (req: Request, res: Response): Promise<void> => {
+router.post("/register", validateBody(registerSchema), async (req, res) => {
   try {
     const { email, password, role, full_name } = req.body;
 
-    if (!email || !password || !role || !full_name) {
-      res.status(400).json({
-        error: "Email, password, full name, and role are required.",
-      });
-      return;
-    }
-
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      res.status(400).json({ error: "User already exists." });
-      return;
+      return res.status(400).json({ error: "User already exists." });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
       data: { email, password: hashedPassword, role, full_name },
@@ -43,40 +51,28 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
       message: "✅ Registration successful.",
       user,
     });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("Register error:", error.message);
-      res.status(500).json({
-        error: "Failed to register user",
-        details: error.message,
-      });
-    } else {
-      console.error("Unknown register error:", error);
-      res.status(500).json({ error: "Failed to register user" });
-    }
+  } catch (err: unknown) {
+    console.error("Register error:", err);
+    res.status(500).json({
+      error: "Failed to register user",
+      details: err instanceof Error ? err.message : undefined,
+    });
   }
 });
 
 /* 🔐 User Login */
-router.post("/login", async (req: Request, res: Response): Promise<void> => {
+router.post("/login", validateBody(loginSchema), async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      res.status(400).json({ error: "Email and password are required." });
-      return;
-    }
-
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !user.password) {
-      res.status(401).json({ error: "Invalid credentials." });
-      return;
+      return res.status(401).json({ error: "Invalid credentials." });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      res.status(401).json({ error: "Invalid credentials." });
-      return;
+      return res.status(401).json({ error: "Invalid credentials." });
     }
 
     const token = jwt.sign(
@@ -95,17 +91,12 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
         full_name: user.full_name,
       },
     });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("Login error:", error.message);
-      res.status(500).json({
-        error: "Login failed",
-        details: error.message,
-      });
-    } else {
-      console.error("Unknown login error:", error);
-      res.status(500).json({ error: "Login failed" });
-    }
+  } catch (err: unknown) {
+    console.error("Login error:", err);
+    res.status(500).json({
+      error: "Login failed",
+      details: err instanceof Error ? err.message : undefined,
+    });
   }
 });
 

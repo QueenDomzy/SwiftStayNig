@@ -1,15 +1,17 @@
 {
   "name": "swiftstay-backend",
   "version": "1.0.0",
+  "description": "SwiftStay Backend API — built with TypeScript, Express, and Prisma",
   "main": "dist/server/index.js",
+  "license": "MIT",
+  "type": "commonjs",
   "scripts": {
-    "dev": "tsx server/index.ts",
-    "build": "tsc && npx prisma generate && npx prisma migrate deploy",
+    "dev": "tsx watch server/index.ts",
+    "build": "rimraf dist && tsc && prisma generate && prisma migrate deploy",
     "start": "node dist/server/index.js",
-    "prisma:migrate": "npx prisma migrate dev --name init",
-    "prisma:generate": "npx prisma generate",
-    "prisma:seed": "npx prisma db seed",
-    "seed": "npm run prisma:seed"
+    "migrate": "prisma migrate dev --name init",
+    "generate": "prisma generate",
+    "seed": "prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
@@ -21,7 +23,8 @@
     "express-rate-limit": "^7.0.0",
     "express-validator": "^7.0.1",
     "find-free-port": "^2.0.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -32,8 +35,12 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.9.1",
     "prisma": "^6.17.1",
-    "ts-node": "^10.9.2",
+    "rimraf": "^6.0.1",
     "tsx": "^4.16.0",
     "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
