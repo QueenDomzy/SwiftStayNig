@@ -1,16 +1,15 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 
 // 🧩 Route imports
 import authRoutes from "./routes/auth";
-import propertyRoutes from "./routes/propertyRoutes";
-import bookingRoutes from "./routes/bookingRoutes";
-import paymentRoutes from "./routes/paymentRoutes";
-// (optional future routes)
-// import onboardingRoutes from "./routes/onboardingRoutes";
-// import aiRoutes from "./routes/aiRoutes";
+import propertyRoutes from "./routes/property";
+import bookingRoutes from "./routes/booking";
+import paymentRoutes from "./routes/payment";
+import onboardingRoutes from "./routes/onboarding";
+import aiRoutes from "./routes/ai";
 
 dotenv.config();
 
@@ -22,7 +21,7 @@ app.use(cors());
 app.use(express.json());
 
 /* 🩵 Health Check */
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     status: "ok",
     message: "🏡 SwiftStay API is running smoothly ✅",
@@ -35,25 +34,25 @@ app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
-// app.use("/api/onboarding", onboardingRoutes);
-// app.use("/api/ai", aiRoutes);
+app.use("/api/onboarding", onboardingRoutes);
+app.use("/api/ai", aiRoutes);
 
 /* 🧹 Global Error Handler */
-app.use((err, req, res, next) => {
-  console.error("🚨 Server Error:", err.stack);
-  res.status(500).json({ error: "Internal Server Error" });
-});
+app.use(
+  (err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error("🚨 Server Error:", err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+);
 
 /* 🛠 Graceful Prisma Shutdown */
-process.on("SIGINT", async () => {
+const shutdown = async () => {
   await prisma.$disconnect();
   process.exit(0);
-});
+};
 
-process.on("SIGTERM", async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-});
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 
 /* 🚀 Start Server */
 const PORT = process.env.PORT || 5001;
