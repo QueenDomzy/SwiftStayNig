@@ -1,0 +1,2 @@
+// server/global.d.ts
+declare module 'some-package';
