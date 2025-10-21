@@ -1,31 +1,36 @@
+// context/AuthContext.js
 import { createContext, useContext, useState, useEffect } from "react";
 
-const AuthContext = createContext();
+// ✅ Create AuthContext once
+const AuthContext = createContext(null);
 
+// ✅ Provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Placeholder login/logout logic
+  // Login function (replace with real backend auth)
   const login = async (email, password) => {
-    // TODO: Replace with real backend auth later
     console.log("Logging in with:", email, password);
+    // Example: fetch("/api/auth/login", { ... })
     setUser({ email });
   };
 
+  // Signup function (replace with real backend auth)
   const signup = async (email, password) => {
-    // TODO: Replace with real backend auth later
     console.log("Signing up with:", email, password);
+    // Example: fetch("/api/auth/register", { ... })
     setUser({ email });
   };
 
+  // Logout function
   const logout = async () => {
     console.log("Logging out");
     setUser(null);
   };
 
+  // On mount: check for existing session (SSR-safe)
   useEffect(() => {
-    // Placeholder: simulate checking existing session
-    const storedUser = null;
+    const storedUser = null; // replace with localStorage or cookie check
     if (storedUser) setUser(storedUser);
   }, []);
 
@@ -36,5 +41,14 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook for easy access
-export const useAuth = () => useContext(AuthContext);
+// ✅ Custom hook for easy access in components
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+// ✅ Default export for imports if needed
+export default AuthContext;
