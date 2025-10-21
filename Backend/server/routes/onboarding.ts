@@ -3,6 +3,13 @@ import { body, validationResult } from "express-validator";
 
 const router = express.Router();
 
+// Define interface for request body
+interface OnboardingRequestBody {
+  name: string;
+  email: string;
+  preferences?: string[]; // optional array of strings
+}
+
 /**
  * @route   POST /api/onboarding
  * @desc    Collect onboarding info for a new user
@@ -15,7 +22,7 @@ router.post(
     body("email").isEmail().withMessage("Valid email required"),
     body("preferences").optional().isArray(),
   ],
-  async (req: Request, res: Response) => {
+  async (req: Request<{}, {}, OnboardingRequestBody>, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
