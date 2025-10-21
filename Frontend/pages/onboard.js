@@ -19,7 +19,6 @@ export default function Onboard() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ✅ Handle multiple image upload to Cloudinary
   const handleImageUpload = async (e) => {
     const files = e.target.files;
     if (!files.length) return;
@@ -34,10 +33,13 @@ export default function Onboard() {
       data.append("cloud_name", process.env.NEXT_PUBLIC_CLOUDINARY_CLOUDNAME);
 
       try {
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUDNAME}/image/upload`, {
-          method: "POST",
-          body: data,
-        });
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUDNAME}/image/upload`,
+          {
+            method: "POST",
+            body: data,
+          }
+        );
 
         const json = await res.json();
         if (json.secure_url) uploadedUrls.push(json.secure_url);
@@ -160,7 +162,25 @@ export default function Onboard() {
         {form.images.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mt-2">
             {form.images.map((img, i) => (
-              <img key={i} src={img} alt={`uploaded-${i}`} className="rounded-lg h-24 w-full object-cover" />
+              <img
+                key={i}
+                src={img}
+                alt={`uploaded-${i}`}
+                className="rounded-lg h-24 w-full object-cover"
+              />
             ))}
           </div>
         )}
+
+        {status && <p className="mt-2 text-center">{status}</p>}
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        >
+          Submit Property
+        </button>
+      </form>
+    </main>
+  );
+}
