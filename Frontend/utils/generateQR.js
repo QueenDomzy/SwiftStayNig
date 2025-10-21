@@ -1,8 +1,8 @@
 // utils/generateQR.js
-import generateQR from "../utils/generateQR";
 
 export async function generateQR(text) {
-  const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
+  const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+    text
+  )}`;
   return qrApi;
 }
-
