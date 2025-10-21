@@ -1,71 +1,81 @@
-import { Router, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-// User registration
+/* 🩵 Route Health Check */
+router.get("/", (req: Request, res: Response) => {
+  res.json({
+    message: "🧩 Auth routes active",
+    routes: ["/register", "/login"],
+  });
+});
+
+/* 🧾 User Registration */
 router.post("/register", async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, role, full_name } = req.body;
 
-    if (!email || !password || !role) {
-      res.status(400).json({ error: "Email, password, and role are required" });
+    if (!email || !password || !role || !full_name) {
+      res.status(400).json({
+        error: "Email, password, full name, and role are required.",
+      });
       return;
     }
 
-    if (!full_name) {
-      res.status(400).json({ error: "Full name is required" });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      res.status(400).json({ error: "User already exists." });
       return;
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      res.status(400).json({ error: "User already exists" });
-      return;
-    }
-
-    const hashed = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
-      data: { email, password: hashed, role, full_name },
+      data: { email, password: hashedPassword, role, full_name },
+      select: { id: true, email: true, role: true, full_name: true },
     });
 
-    res.json(user);
+    res.status(201).json({
+      message: "✅ Registration successful.",
+      user,
+    });
   } catch (error: unknown) {
-    // Narrow unknown type safely
     if (error instanceof Error) {
       console.error("Register error:", error.message);
-      res.status(500).json({ error: "Failed to register user", details: error.message });
+      res.status(500).json({
+        error: "Failed to register user",
+        details: error.message,
+      });
     } else {
-      console.error("Register unknown error:", error);
+      console.error("Unknown register error:", error);
       res.status(500).json({ error: "Failed to register user" });
     }
   }
 });
 
-// User login
+/* 🔐 User Login */
 router.post("/login", async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ error: "Email and password are required" });
+      res.status(400).json({ error: "Email and password are required." });
       return;
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
-
     if (!user || !user.password) {
-      res.status(401).json({ error: "Invalid credentials" });
+      res.status(401).json({ error: "Invalid credentials." });
       return;
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      res.status(401).json({ error: "Invalid credentials" });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      res.status(401).json({ error: "Invalid credentials." });
       return;
     }
 
@@ -75,14 +85,25 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token, user });
+    res.status(200).json({
+      message: "✅ Login successful.",
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        full_name: user.full_name,
+      },
+    });
   } catch (error: unknown) {
-    // Narrow unknown type safely
     if (error instanceof Error) {
       console.error("Login error:", error.message);
-      res.status(500).json({ error: "Login failed", details: error.message });
+      res.status(500).json({
+        error: "Login failed",
+        details: error.message,
+      });
     } else {
-      console.error("Login unknown error:", error);
+      console.error("Unknown login error:", error);
       res.status(500).json({ error: "Login failed" });
     }
   }
