@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
+dotenv.config();
 import { PrismaClient } from "@prisma/client";
 import rateLimit from "express-rate-limit";
 
