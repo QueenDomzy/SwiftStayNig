@@ -16,7 +16,6 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // If your schema requires full_name, enforce it
     if (!full_name) {
       res.status(400).json({ error: "Full name is required" });
       return;
@@ -35,9 +34,15 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
     });
 
     res.json(user);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to register user" });
+  } catch (error: unknown) {
+    // Narrow unknown type safely
+    if (error instanceof Error) {
+      console.error("Register error:", error.message);
+      res.status(500).json({ error: "Failed to register user", details: error.message });
+    } else {
+      console.error("Register unknown error:", error);
+      res.status(500).json({ error: "Failed to register user" });
+    }
   }
 });
 
@@ -71,9 +76,15 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
     );
 
     res.json({ token, user });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Login failed" });
+  } catch (error: unknown) {
+    // Narrow unknown type safely
+    if (error instanceof Error) {
+      console.error("Login error:", error.message);
+      res.status(500).json({ error: "Login failed", details: error.message });
+    } else {
+      console.error("Login unknown error:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
   }
 });
 
