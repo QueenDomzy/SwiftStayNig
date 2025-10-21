@@ -13,6 +13,6 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["server/**/*.ts", "prisma/**/*.ts"],
+  "include": ["server/**/*", "server/global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
