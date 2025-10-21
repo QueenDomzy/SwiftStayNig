@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 dotenv.config();
 const router = express.Router();
@@ -18,7 +18,6 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     // Example: call an external AI API (replace with your model or logic)
-    // e.g. OpenAI API
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
@@ -36,8 +35,16 @@ router.post("/", async (req: Request, res: Response) => {
     const aiReply = response.data.choices?.[0]?.message?.content || "No response";
 
     res.json({ reply: aiReply });
-  } catch (error: any) {
-    console.error("AI route error:", error.response?.data || error.message);
+  } catch (error: unknown) {
+    // Narrow unknown type safely
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      console.error("AI route error:", axiosError.response?.data || axiosError.message);
+    } else if (error instanceof Error) {
+      console.error("AI route error:", error.message);
+    } else {
+      console.error("AI route error:", error);
+    }
     res.status(500).json({ message: "AI service error" });
   }
 });
