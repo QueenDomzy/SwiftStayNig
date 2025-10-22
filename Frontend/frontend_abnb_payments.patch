@@ -1,0 +1,264 @@
+--- frontend_abnb_payments.patch
+*** Begin Patch
+*** Add File: components/SearchFilters.jsx
++import React, { useState } from "react";
++
++export default function SearchFilters({ onChange }) {
++  const [filters, setFilters] = useState({
++    city: "",
++    propertyType: "",
++    abnbOnly: false,
++    guests: 1,
++    checkIn: "",
++    checkOut: ""
++  });
++
++  function update(changes) {
++    const next = { ...filters, ...changes };
++    setFilters(next);
++    onChange && onChange(next);
++  }
++
++  return (
++    <div className="search-filters p-4">
++      <input placeholder="City" value={filters.city} onChange={e=>update({city: e.target.value})} className="input" />
++      <div className="mt-2">
++        <label>
++          <input type="checkbox" checked={filters.abnbOnly} onChange={e=>update({abnbOnly: e.target.checked})} /> ABnB only
++        </label>
++      </div>
++      <select value={filters.propertyType} onChange={e=>update({propertyType: e.target.value})} className="mt-2">
++        <option value="">Any type</option>
++        <option value="APARTMENT">Apartment</option>
++        <option value="HOME">Home</option>
++        <option value="TREEHOUSE">Treehouse</option>
++        <option value="CASTLE">Castle</option>
++        <option value="ABnB">ABnB</option>
++      </select>
++      <div className="mt-2">
++        <input type="date" value={filters.checkIn} onChange={e=>update({checkIn: e.target.value})} />
++        <input type="date" value={filters.checkOut} onChange={e=>update({checkOut: e.target.value})} className="ml-2" />
++      </div>
++      <div className="mt-2">
++        <label>Guests</label>
++        <input type="number" min="1" value={filters.guests} onChange={e=>update({guests: Number(e.target.value)})} className="ml-2 w-20" />
++      </div>
++    </div>
++  );
++}
++
+*** End Patch
+
+*** Begin Patch
+*** Add File: components/PropertyCard.jsx
++import React from "react";
++
++export default function PropertyCard({ property, onBook }) {
++  return (
++    <div className="card p-4 border rounded">
++      <img src={property.photos?.[0] || "/placeholder.jpg"} alt={property.title} className="w-full h-40 object-cover rounded" />
++      <h3 className="mt-2 font-bold">{property.title}</h3>
++      <p className="text-sm">{property.city} • {property.propertyType}</p>
++
++      <div className="mt-2 flex gap-3 items-center">
++        <span title="Air comfort">🌬️ {property.airComfortRating ? `${property.airComfortRating}/5` : "—"}</span>
++        <span title="Bed">🛏️ {property.bedrooms || 1} beds</span>
++        {property.breakfastIncluded || property.breakfastPrice ? (
++          <span title="Breakfast">🍳 {property.breakfastIncluded ? "Breakfast included" : `Breakfast +₦${property.breakfastPrice}`}</span>
++        ) : null}
++      </div>
++
++      <div className="mt-3 flex justify-between items-center">
++        <div className="text-lg font-semibold">₦{property.pricePerNight}</div>
++        <button className="btn" onClick={() => onBook(property)}>Book</button>
++      </div>
++    </div>
++  );
++}
++
+*** End Patch
+
+*** Begin Patch
+*** Add File: components/PaymentSelector.jsx
++import React from "react";
++
++export default function PaymentSelector({ amount, onPay }) {
++  return (
++    <div className="payment-selector p-3 border rounded">
++      <div className="mb-2">Total: ₦{amount}</div>
++      <div className="flex gap-2">
++        <button className="btn" onClick={() => onPay({ method: "PAYSTACK" })}>Pay with Paystack</button>
++        <button className="btn" onClick={() => onPay({ method: "FLUTTERWAVE" })}>Pay with Flutterwave</button>
++      </div>
++    </div>
++  );
++}
++
+*** End Patch
+
+*** Begin Patch
+*** Add File: lib/api.js
++export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api";
++
++export async function getProperty(id) {
++  const res = await fetch(`${API_BASE}/properties/${id}`);
++  return res.json();
++}
++
++export async function createBooking(payload) {
++  const res = await fetch(`${API_BASE}/bookings`, {
++    method: "POST",
++    headers: { "Content-Type": "application/json" },
++    body: JSON.stringify(payload)
++  });
++  return res.json();
++}
++
++export async function initPaystack({ email, amount, bookingId }) {
++  const res = await fetch(`${API_BASE}/payments/paystack/init`, {
++    method: "POST",
++    headers: { "Content-Type": "application/json" },
++    body: JSON.stringify({ email, amount, bookingId })
++  });
++  return res.json();
++}
++
++export async function initFlutterwave({ email, amount, bookingId }) {
++  const res = await fetch(`${API_BASE}/payments/flutterwave/init`, {
++    method: "POST",
++    headers: { "Content-Type": "application/json" },
++    body: JSON.stringify({ email, amount, bookingId })
++  });
++  return res.json();
++}
++
+*** End Patch
+
+*** Begin Patch
+*** Add File: pages/booking/[id].jsx
++import { useState, useEffect } from "react";
++import { useRouter } from "next/router";
++import { getProperty, createBooking, initPaystack, initFlutterwave } from "../../lib/api";
++import PaymentSelector from "../../components/PaymentSelector";
++
++export default function BookingPage() {
++  const [property, setProperty] = useState(null);
++  const [guests, setGuests] = useState(1);
++  const [checkIn, setCheckIn] = useState("");
++  const [checkOut, setCheckOut] = useState("");
++  const [breakfastAddOn, setBreakfastAddOn] = useState(false);
++  const [loading, setLoading] = useState(false);
++  const router = useRouter();
++  const { id } = router.query;
++
++  useEffect(() => {
++    if (!id) return;
++    getProperty(id).then(j => setProperty(j.property));
++  }, [id]);
++
++  async function createAndPay(method) {
++    setLoading(true);
++    const payload = {
++      propertyId: Number(id),
++      userId: 1,
++      checkIn,
++      checkOut,
++      guests,
++      breakfastAddOn,
++      paymentMethod: method
++    };
++    const bookingRes = await createBooking(payload);
++    if (!bookingRes.booking) {
++      alert(bookingRes.error || "Booking failed");
++      setLoading(false);
++      return;
++    }
++    const booking = bookingRes.booking;
++
++    if (method === "PAYSTACK") {
++      const init = await initPaystack({ email: "guest@example.com", amount: booking.totalAmount, bookingId: booking.id });
++      if (init.authorization_url) window.location.href = init.authorization_url;
++      else alert("Paystack init failed");
++    } else if (method === "FLUTTERWAVE") {
++      const init = await initFlutterwave({ email: "guest@example.com", amount: booking.totalAmount, bookingId: booking.id });
++      if (init.link) window.location.href = init.link;
++      else alert("Flutterwave init failed");
++    }
++    setLoading(false);
++  }
++
++  if (!property) return <div>Loading…</div>;
++
++  const nights = (checkIn && checkOut) ? Math.max(1, Math.round((new Date(checkOut) - new Date(checkIn)) / (1000*60*60*24))) : 1;
++  let total = Number(property.pricePerNight) * nights;
++  if (breakfastAddOn && property.breakfastPrice) total += Number(property.breakfastPrice) * guests * nights;
++
++  return (
++    <div className="p-4 max-w-2xl mx-auto">
++      <h1 className="text-2xl font-bold">{property.title}</h1>
++      <p>{property.city} • ₦{property.pricePerNight} / night</p>
++
++      <div className="mt-4">
++        <label>Check-in</label>
++        <input type="date" value={checkIn} onChange={e=>setCheckIn(e.target.value)} />
++        <label className="ml-4">Check-out</label>
++        <input type="date" value={checkOut} onChange={e=>setCheckOut(e.target.value)} />
++      </div>
++
++      <div className="mt-4">
++        <label>Guests</label>
++        <input type="number" min="1" value={guests} onChange={e=>setGuests(Number(e.target.value))} className="ml-2 w-20" />
++      </div>
++
++      <div className="mt-4">
++        <label>
++          <input type="checkbox" checked={breakfastAddOn} onChange={e=>setBreakfastAddOn(e.target.checked)} /> Add breakfast ({property.breakfastPrice ? `₦${property.breakfastPrice} per guest/night` : "Contact host"})
++        </label>
++      </div>
++
++      <div className="mt-6">
++        <PaymentSelector amount={total} onPay={({ method }) => createAndPay(method)} />
++      </div>
++
++      {loading && <div>Processing…</div>}
++    </div>
++  );
++}
++
+*** End Patch
+
+*** Begin Patch
+*** Add File: public/placeholder.jpg
++# Add or replace with an actual placeholder image in your public folder.
++# (binary images can't be included in this patch; add any jpg/png named placeholder.jpg)
++
+*** End Patch
+
+*** Begin Patch
+*** Add File: README_FRONTEND.md
++# SwiftStay Frontend — ABnB support
++
++## Setup
++1. Add `.env.local`:
++   NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api
++2. `npm install`
++3. `npm run dev`
++
++## Pages/components added
++- components/SearchFilters.jsx
++- components/PropertyCard.jsx
++- components/PaymentSelector.jsx
++- lib/api.js
++- pages/booking/[id].jsx
++
++## Notes
++- Replace `userId` and email placeholders with real authenticated user data.
++- Ensure NEXT_PUBLIC_API_BASE_URL points to your backend API.
++
+*** End Patch
+
+
+Apply:
+
+```bash
+git apply frontend_abnb_payments.patch
