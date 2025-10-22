@@ -8,45 +8,64 @@ datasource db {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  full_name  String
-  email      String     @unique
-  phone      String?
-  password   String
-  role       String     @default("guest")
-  createdAt  DateTime   @default(now())
-  bookings   Booking[]
-  properties Property[]
-  reviews    Review[]
+  id               Int        @id @default(autoincrement())
+  full_name        String
+  email            String     @unique
+  phone            String?
+  password         String
+  role             String     @default("guest")
+  createdAt        DateTime   @default(now())
+  bookings         Booking[]
+  propertiesOwned  Property[] @relation("OwnerProperties")
+  propertiesHosted Property[] @relation("HostProperties")
+  reviews          Review[]
 }
 
 model Property {
-  id          Int       @id @default(autoincrement())
-  ownerId     Int
+  id          Int      @id @default(autoincrement())
   name        String
-  description String?
   location    String
   price       Float
+  description String?
   images      String[]
-  createdAt   DateTime  @default(now())
-  bookings    Booking[]
-  owner       User      @relation(fields: [ownerId], references: [id])
-  reviews     Review[]
+  ownerId     Int
+  hostId      Int?
+  createdAt   DateTime @default(now())
+
+  // 🧩 Fix ambiguous relations with User
+  owner User  @relation("OwnerProperties", fields: [ownerId], references: [id])
+  host  User? @relation("HostProperties", fields: [hostId], references: [id])
+
+  // 🆕 Add missing reverse relations:
+  bookings Booking[]
+  reviews  Review[]
 }
 
 model Booking {
-  id         Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   propertyId Int
   userId     Int
   checkIn    DateTime
   checkOut   DateTime
   totalPrice Float
-  commission Float?
-  status     String    @default("pending")
-  createdAt  DateTime  @default(now())
-  property   Property  @relation(fields: [propertyId], references: [id])
-  user       User      @relation(fields: [userId], references: [id])
-  payments   Payment[]
+  commission Float
+  createdAt  DateTime @default(now())
+
+  property Property  @relation(fields: [propertyId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  Payment  Payment[]
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  userId     Int
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 }
 
 model Payment {
@@ -58,15 +77,4 @@ model Payment {
   reference String?
   bookingId Int
   booking   Booking @relation(fields: [bookingId], references: [id])
-}
-
-model Review {
-  id         Int      @id @default(autoincrement())
-  propertyId Int
-  userId     Int
-  rating     Int
-  comment    String?
-  createdAt  DateTime @default(now())
-  property   Property @relation(fields: [propertyId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
 }

@@ -1,5 +1,5 @@
-// src/routes/property.ts
-import { Router, Request, Response, NextFunction } from "express";
+// server/routes/property.ts
+import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import rateLimit from "express-rate-limit";
 import { body, param, validationResult } from "express-validator";
@@ -9,7 +9,7 @@ const router = Router();
 
 /* 🧱 Rate limiting */
 const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
   max: 20,
   message: { error: "Too many requests, please try again later." },
 });
@@ -18,45 +18,48 @@ router.use(limiter);
 /* 🧹 Error handler */
 const handleError = (res: Response, error: unknown, message = "Server error") => {
   console.error(message, error);
-  res.status(500).json({ error: message, details: error instanceof Error ? error.message : undefined });
+  res.status(500).json({
+    error: message,
+    details: error instanceof Error ? error.message : undefined,
+  });
 };
 
 /* ✅ Create a property */
 router.post(
   "/",
   [
-    body("name").isString().isLength({ min: 2 }).trim(),
+    body("title").isString().isLength({ min: 2 }).trim(),
     body("location").isString().isLength({ min: 2 }).trim(),
-    body("price").isFloat({ gt: 0 }),
+    body("pricePerNight").isFloat({ gt: 0 }),
     body("description").optional().isString(),
-    body("images").optional().isArray().custom(arr => arr.every((i: any) => typeof i === "string")),
-    body("ownerId").optional().isInt(),
+    body("images").optional().isArray(),
+    body("hostId").optional().isInt(),
   ],
-  async (
-    req: Request<{}, {}, { name: string; location: string; price: number; description?: string; images?: string[]; ownerId?: number }>,
-    res: Response
-  ) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const { name, location, price, description, images, ownerId } = req.body;
+    const { title, location, pricePerNight, description, images, hostId } = req.body;
 
     try {
-      // Build Prisma data object
-      const data = {
-        name,
-        location,
-        price,
-        description: description ?? null,
-        images: images ?? [],
-      } as const;
+      const property = await prisma.property.create({
+        data: {
+          title,
+          location,
+          pricePerNight,
+          description: description ?? null,
+          images: images ?? [],
+          ...(hostId ? { hostId: Number(hostId) } : {}),
+        },
+        include: {
+          host: true, // ✅ Must exist in schema
+        },
+      });
 
-      // Create property with or without ownerId
-      const property = ownerId
-        ? await prisma.property.create({ data: { ...data, ownerId: ownerId as number } })
-        : await prisma.property.create({ data });
-
-      res.status(201).json({ message: "Property created successfully", data: property });
+      res.status(201).json({
+        message: "Property created successfully",
+        data: property,
+      });
     } catch (error) {
       handleError(res, error, "Failed to create property");
     }
@@ -67,7 +70,9 @@ router.post(
 router.get("/", async (_req: Request, res: Response) => {
   try {
     const properties = await prisma.property.findMany({
-      include: { owner: true },
+      include: {
+        host: true,
+      },
       orderBy: { createdAt: "desc" },
     });
     res.status(200).json({ count: properties.length, data: properties });
@@ -89,7 +94,7 @@ router.get(
     try {
       const property = await prisma.property.findUnique({
         where: { id: propertyId },
-        include: { owner: true },
+        include: { host: true },
       });
       if (!property) return res.status(404).json({ error: "Property not found" });
       res.status(200).json(property);

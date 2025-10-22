@@ -1,5 +1,5 @@
 // server/routes/auth.ts
-import { Router, Request, Response, NextFunction } from "express";
+import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -22,7 +22,7 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   role: z.string().min(1),
-  full_name: z.string().min(1),
+  full_name: z.string().min(1), // ✅ match field naming with DB
 });
 
 const loginSchema = z.object({
@@ -36,7 +36,7 @@ router.post(
   validateBody(registerSchema),
   async (req: Request<{}, {}, z.infer<typeof registerSchema>>, res: Response) => {
     try {
-      const { email, password, role, full_name } = req.body;
+      const { email, password, role, full_name } = req.body; // ✅ corrected from "fullname"
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
