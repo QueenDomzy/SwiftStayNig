@@ -1,4 +1,4 @@
-// src/routes/propertyRoutes.ts
+// src/routes/property.ts
 import { Router, Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import rateLimit from "express-rate-limit";
@@ -7,81 +7,82 @@ import { body, param, validationResult } from "express-validator";
 const prisma = new PrismaClient();
 const router = Router();
 
-/* 🧱  Rate limiting to prevent abuse (esp. 429 Too Many Requests) */
+/* 🧱 Rate limiting */
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 20, // limit each IP to 20 requests per minute
+  max: 20,
   message: { error: "Too many requests, please try again later." },
 });
-
 router.use(limiter);
 
-/* 🧹 Utility for error handling */
+/* 🧹 Error handler */
 const handleError = (res: Response, error: unknown, message = "Server error") => {
   console.error(message, error);
-  res.status(500).json({ error: message });
+  res.status(500).json({ error: message, details: error instanceof Error ? error.message : undefined });
 };
 
-/* ✅ Add a property (POST /api/properties) */
+/* ✅ Create a property */
 router.post(
   "/",
   [
     body("name").isString().isLength({ min: 2 }).trim(),
     body("location").isString().isLength({ min: 2 }).trim(),
     body("price").isFloat({ gt: 0 }),
-    body("description").isString().optional(),
-    body("images").isArray().optional(),
-    body("ownerId").isInt().optional(),
+    body("description").optional().isString(),
+    body("images").optional().isArray().custom(arr => arr.every((i: any) => typeof i === "string")),
+    body("ownerId").optional().isInt(),
   ],
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (
+    req: Request<{}, {}, { name: string; location: string; price: number; description?: string; images?: string[]; ownerId?: number }>,
+    res: Response
+  ) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const { name, location, price, description, images, ownerId } = req.body;
 
     try {
-      const property = await prisma.property.create({
-        data: { name, location, price, description, images, ownerId },
-      });
+      // Build Prisma data object
+      const data = {
+        name,
+        location,
+        price,
+        description: description ?? null,
+        images: images ?? [],
+      } as const;
 
-      res.status(201).json({
-        message: "Property created successfully",
-        data: property,
-      });
+      // Create property with or without ownerId
+      const property = ownerId
+        ? await prisma.property.create({ data: { ...data, ownerId: ownerId as number } })
+        : await prisma.property.create({ data });
+
+      res.status(201).json({ message: "Property created successfully", data: property });
     } catch (error) {
       handleError(res, error, "Failed to create property");
     }
   }
 );
 
-/* ✅ Get all properties (GET /api/properties) */
-router.get("/", async (_req: Request, res: Response, next: NextFunction) => {
+/* ✅ Get all properties */
+router.get("/", async (_req: Request, res: Response) => {
   try {
     const properties = await prisma.property.findMany({
       include: { owner: true },
       orderBy: { createdAt: "desc" },
     });
-
-    res.status(200).json({
-      count: properties.length,
-      data: properties,
-    });
+    res.status(200).json({ count: properties.length, data: properties });
   } catch (error) {
     handleError(res, error, "Failed to fetch properties");
   }
 });
 
-/* ✅ Get property by ID (GET /api/properties/:id) */
+/* ✅ Get property by ID */
 router.get(
   "/:id",
-  [param("id").isInt().toInt()],
-  async (req: Request, res: Response, next: NextFunction) => {
+  [param("id").isInt({ gt: 0 }).toInt()],
+  async (req: Request<{ id: string }>, res: Response) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const propertyId = Number(req.params.id);
 
@@ -90,11 +91,7 @@ router.get(
         where: { id: propertyId },
         include: { owner: true },
       });
-
-      if (!property) {
-        return res.status(404).json({ error: "Property not found" });
-      }
-
+      if (!property) return res.status(404).json({ error: "Property not found" });
       res.status(200).json(property);
     } catch (error) {
       handleError(res, error, "Failed to fetch property");
@@ -102,13 +99,14 @@ router.get(
   }
 );
 
-/* 🧩 Delete property */
+/* ✅ Delete property */
 router.delete(
   "/:id",
-  [param("id").isInt().toInt()],
-  async (req: Request, res: Response, next: NextFunction) => {
+  [param("id").isInt({ gt: 0 }).toInt()],
+  async (req: Request<{ id: string }>, res: Response) => {
     try {
-      await prisma.property.delete({ where: { id: Number(req.params.id) } });
+      const propertyId = Number(req.params.id);
+      await prisma.property.delete({ where: { id: propertyId } });
       res.status(204).send();
     } catch (error) {
       handleError(res, error, "Failed to delete property");

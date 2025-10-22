@@ -1,20 +1,17 @@
-import express, { Request, Response } from "express";
+// server/routes/onboarding.ts
+import express, { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator";
 
 const router = express.Router();
 
-// Define interface for request body
+// Interface for request body
 interface OnboardingRequestBody {
   name: string;
   email: string;
-  preferences?: string[]; // optional array of strings
+  preferences?: string[];
 }
 
-/**
- * @route   POST /api/onboarding
- * @desc    Collect onboarding info for a new user
- * @access  Public or Protected (depends on your logic)
- */
+/* POST /api/onboarding */
 router.post(
   "/",
   [
@@ -22,25 +19,28 @@ router.post(
     body("email").isEmail().withMessage("Valid email required"),
     body("preferences").optional().isArray(),
   ],
-  async (req: Request<{}, {}, OnboardingRequestBody>, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
+  async (req: Request<{}, {}, OnboardingRequestBody>, res: Response, next: NextFunction) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
       const { name, email, preferences } = req.body;
 
-      // Example logic: save onboarding data (replace with Prisma or DB logic)
+      // Example: replace with your Prisma / DB logic
       console.log("Onboarding data:", { name, email, preferences });
 
       res.status(201).json({
         message: "Onboarding complete",
         user: { name, email, preferences },
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Onboarding error:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({
+        message: "Server error",
+        details: error instanceof Error ? error.message : undefined,
+      });
     }
   }
 );

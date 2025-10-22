@@ -1,6 +1,7 @@
+// server/index.ts
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 import { PrismaClient } from "@prisma/client";
 import rateLimit from "express-rate-limit";
@@ -11,25 +12,19 @@ import propertyRoutes from "./routes/property";
 import bookingRoutes from "./routes/booking";
 import paymentRoutes from "./routes/payment";
 import onboardingRoutes from "./routes/onboarding";
-import aiRoutes from "./routes/ai";
-
-dotenv.config();
+import aiRoutes from "./routes/aiRoutes";
 
 const app = express();
 const prisma = new PrismaClient();
 
 /* ✅ Trust proxy (important for Render, Vercel, Cloudflare, etc.) */
-// If you’ll only ever use Render or a single proxy:
 app.set("trust proxy", 1);
-
-// If you might later use multiple proxies/CDNs like Cloudflare, you can switch to:
-// app.set("trust proxy", true);
 
 /* ✅ Rate limiter to prevent abuse */
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // each IP limited to 100 requests per window
-  message: "Too many requests, please try again later.",
+  max: 100, // each IP limited to 100 requests per window
+  message: { error: "Too many requests, please try again later." },
 });
 app.use(limiter);
 
@@ -56,15 +51,24 @@ app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/ai", aiRoutes);
 
 /* 🧹 Global Error Handler */
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("🚨 Server Error:", err.stack);
-  res.status(500).json({ error: "Internal Server Error" });
+  res.status(500).json({
+    error: "Internal Server Error",
+    details: err instanceof Error ? err.message : undefined,
+  });
 });
 
 /* 🛠 Graceful Prisma Shutdown */
 const shutdown = async () => {
-  await prisma.$disconnect();
-  process.exit(0);
+  try {
+    await prisma.$disconnect();
+    console.log("✅ Prisma disconnected gracefully");
+  } catch (err) {
+    console.error("❌ Error disconnecting Prisma:", err);
+  } finally {
+    process.exit(0);
+  }
 };
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
