@@ -22,21 +22,21 @@ model User {
 }
 
 model Property {
-  id          Int      @id @default(autoincrement())
-  name        String
-  location    String
-  price       Float
-  description String?
-  images      String[]
-  ownerId     Int
-  hostId      Int?
-  createdAt   DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  title         String
+  propertyName  String   // ✅ renamed from `name`
+  location      String
+  price         Float
+  pricePerNight Float?
+  description   String?
+  images        String[]
+  ownerId       Int
+  hostId        Int?
+  createdAt     DateTime @default(now())
 
-  // 🧩 Fix ambiguous relations with User
   owner User  @relation("OwnerProperties", fields: [ownerId], references: [id])
   host  User? @relation("HostProperties", fields: [hostId], references: [id])
-
-  // 🆕 Add missing reverse relations:
+  
   bookings Booking[]
   reviews  Review[]
 }

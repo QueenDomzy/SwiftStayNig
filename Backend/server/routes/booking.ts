@@ -21,9 +21,12 @@ router.post("/", async (req: Request<{}, {}, CreateBookingRequest>, res: Respons
   try {
     // Validate with Zod
     const parsed = createBookingSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ errors: parsed.error.errors });
-    }
+
+if (!parsed.success) {
+  // Map Zod issues to an array of error messages
+  const errorMessages = parsed.error.issues.map(issue => issue.message);
+  return res.status(400).json({ errors: errorMessages });
+}
 
     const { userId, propertyId, checkIn, checkOut } = parsed.data;
 
