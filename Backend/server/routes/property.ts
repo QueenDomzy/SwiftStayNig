@@ -1,147 +1,79 @@
-// server/routes/property.ts
-import { Router, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-import rateLimit from "express-rate-limit";
-import { z } from "zod";
+// server/routes/onboarding.ts
+import express, { Request, Response, NextFunction } from "express";
+import { body, validationResult } from "express-validator";
+import { isWebUri } from "valid-url";
 
-const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-/* 🧱 Rate limiting */
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 20,
-  message: { error: "Too many requests, please try again later." },
-});
-router.use(limiter);
+// Interface for request body
+interface OnboardingRequestBody {
+  name: string;
+  email: string;
+  preferences?: string[];
+  website?: string; // optional URL field
+}
 
-/* 🧹 Centralized error handler */
-const handleError = (res: Response, error: unknown, message = "Server error") => {
-  console.error(message, error);
-  res.status(500).json({
-    error: message,
-    details: error instanceof Error ? error.message : undefined,
-  });
-};
+/* POST /api/onboarding */
+router.post(
+  "/",
+  [
+    // Name must not be empty
+    body("name").custom((value) => {
+      if (typeof value !== "string" || value.trim() === "") {
+        throw new Error("Name is required");
+      }
+      return true;
+    }),
 
-/* 🧾 Zod schema for property creation */
-const createPropertySchema = z.object({
-  title: z.string().min(2),
-  propertyName: z.string().min(2),
-  location: z.string().min(2),
-  price: z.number().gt(0),
-  pricePerNight: z.number().optional(),
-  description: z.string().optional(),
-  images: z.array(z.string()).optional(),
-  ownerId: z.number(),
-  hostId: z.number().optional(),
-});
+    // Custom email validator
+    body("email").custom((value) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (typeof value !== "string" || !emailRegex.test(value)) {
+        throw new Error("Valid email required");
+      }
+      return true;
+    }),
 
-/* ✅ Create a property */
-router.post("/", async (req: Request, res: Response) => {
-  try {
-    const parsed = createPropertySchema.safeParse(req.body);
-    if (!parsed.success) {
-      const errorMessages = parsed.error.issues.map((issue) => issue.message);
-      return res.status(400).json({ errors: errorMessages });
+    // Preferences must be an array if provided
+    body("preferences").optional().custom((value) => {
+      if (!Array.isArray(value)) {
+        throw new Error("Preferences must be an array");
+      }
+      return true;
+    }),
+
+    // Optional website URL validation using valid-url
+    body("website").optional().custom((value) => {
+      if (!isWebUri(value)) {
+        throw new Error("Invalid URL");
+      }
+      return true;
+    }),
+  ],
+  async (req: Request<{}, {}, OnboardingRequestBody>, res: Response, next: NextFunction) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { name, email, preferences, website } = req.body;
+
+      // Example: replace with your Prisma / DB logic
+      console.log("Onboarding data:", { name, email, preferences, website });
+
+      res.status(201).json({
+        message: "Onboarding complete",
+        user: { name, email, preferences, website },
+      });
+    } catch (error: unknown) {
+      console.error("Onboarding error:", error);
+      res.status(500).json({
+        message: "Server error",
+        details: error instanceof Error ? error.message : undefined,
+      });
     }
-
-    const { 
-      title, 
-      propertyName, 
-      location, 
-      price, 
-      pricePerNight, 
-      description, 
-      images, 
-      ownerId, 
-      hostId 
-    } = parsed.data;
-
-    const property = await prisma.property.create({
-      data: {
-        title,
-        propertyName,  // ✅ match schema field
-        location,
-        price,
-        pricePerNight,
-        description: description ?? null,
-        images: images ?? [],
-        ownerId,
-        ...(hostId ? { hostId } : {}),
-      },
-      include: {
-        owner: true,
-        host: true,
-        bookings: true,
-        reviews: true,
-      },
-    });
-
-    res.status(201).json({
-      message: "Property created successfully",
-      data: property,
-    });
-  } catch (error) {
-    handleError(res, error, "Failed to create property");
   }
-});
-
-/* ✅ Get all properties */
-router.get("/", async (_req: Request, res: Response) => {
-  try {
-    const properties = await prisma.property.findMany({
-      include: {
-        owner: true,
-        host: true,
-        bookings: true,
-        reviews: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    res.status(200).json({ count: properties.length, data: properties });
-  } catch (error) {
-    handleError(res, error, "Failed to fetch properties");
-  }
-});
-
-/* ✅ Get property by ID */
-router.get("/:id", async (req: Request<{ id: string }>, res: Response) => {
-  const propertyId = Number(req.params.id);
-  if (isNaN(propertyId) || propertyId <= 0) {
-    return res.status(400).json({ error: "Invalid property ID" });
-  }
-
-  try {
-    const property = await prisma.property.findUnique({
-      where: { id: propertyId },
-      include: {
-        owner: true,
-        host: true,
-        bookings: true,
-        reviews: true,
-      },
-    });
-    if (!property) return res.status(404).json({ error: "Property not found" });
-    res.status(200).json(property);
-  } catch (error) {
-    handleError(res, error, "Failed to fetch property");
-  }
-});
-
-/* ✅ Delete property */
-router.delete("/:id", async (req: Request<{ id: string }>, res: Response) => {
-  const propertyId = Number(req.params.id);
-  if (isNaN(propertyId) || propertyId <= 0) {
-    return res.status(400).json({ error: "Invalid property ID" });
-  }
-
-  try {
-    await prisma.property.delete({ where: { id: propertyId } });
-    res.status(204).send();
-  } catch (error) {
-    handleError(res, error, "Failed to delete property");
-  }
-});
+);
 
 export default router;
