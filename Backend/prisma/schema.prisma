@@ -42,18 +42,24 @@ model Property {
 }
 
 model Booking {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   propertyId Int
   userId     Int
   checkIn    DateTime
   checkOut   DateTime
   totalPrice Float
   commission Float
+  status     BookingStatus @default(PENDING) // ✅ add enum field
   createdAt  DateTime @default(now())
+  property   Property  @relation(fields: [propertyId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+  payments   Payment[]
+}
 
-  property Property  @relation(fields: [propertyId], references: [id])
-  user     User      @relation(fields: [userId], references: [id])
-  Payment  Payment[]
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
 }
 
 model Review {

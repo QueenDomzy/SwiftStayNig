@@ -1,6 +1,6 @@
 // server/routes/payment.ts
 import { Router, Request, Response, NextFunction } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, BookingStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -45,9 +45,13 @@ router.post(
 
       // Update booking status
       await prisma.booking.update({
-        where: { id: parsedBookingId },
-        data: { status: "confirmed" },
-      });
+  where: { id: parsedBookingId },
+  data: {
+    status: "CONFIRMED", // if `status` is String
+    // OR
+    // status: BookingStatus.CONFIRMED, // if status is enum
+  },
+});
 
       res.status(201).json({
         message: "Payment recorded and booking confirmed",
@@ -71,9 +75,9 @@ router.get("/", async (_req: Request, res: Response) => {
     });
     res.status(200).json(payments);
   } catch (err: unknown) {
-    console.error("Fetch payments error:", err);
+    console.error("Fetch Payment error:", err);
     res.status(500).json({
-      error: "Could not fetch payments",
+      error: "Could not fetch Payment",
       details: err instanceof Error ? err.message : undefined,
     });
   }
