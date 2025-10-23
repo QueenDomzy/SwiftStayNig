@@ -7,7 +7,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "tsx watch server/index.ts",
-    "build": "rimraf dist && tsc && prisma generate && prisma migrate deploy",
+    "build": "npx rimraf dist && tsc && prisma generate && prisma migrate deploy",
     "start": "node dist/server/index.js",
     "migrate": "prisma migrate dev --name init",
     "generate": "prisma generate",
