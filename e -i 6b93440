@@ -1,0 +1,142 @@
+[33m77d3a58[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/abnb-payments[m[33m)[m Fix Prisma generation and add Prisma repair script
+[33m6b93440[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m Fix TypeScript errors in property route and other backend routes
+[33mebda409[m Refactor auth routes: added Zod validation, type-safe req.body, fixed TS errors
+[33m1a8af4a[m Fix TypeScript build configuration and include paths for successful build
+[33m96fac20[m fix: resolved port conflict and regenerated Prisma client and tsconfig.json
+[33med8862e[m Add Node.js type definitions and update TypeScript config
+[33m59a532a[m Add missing TypeScript type definitions
+[33m67ac294[m Fix Prisma database connection and build configuration
+[33md5c0391[m fix: added type declarations and prisma config
+[33md206bb3[m npm run build
+[33m1389fee[m npm run build
+[33m2887295[m npm run build
+[33m3f13ca1[m npm run build
+[33m236a446[m Add TypeScript type definitions for express, cors, bcryptjs, jsonwebtoken
+[33me8e4cd9[m Move @types/node to dependencies to fix TS2688
+[33m2349531[m npm run build
+[33mcd25f29[m chore: add @types/node for TypeScript support
+[33mdd491f5[m npm run build
+[33mb36770d[m npm run build
+[33m32d84a8[m npm run build
+[33mcb75f73[m npm run build
+[33m9fa28f5[m npm run build
+[33m210f146[m npm run build
+[33mba0719d[m npm run build
+[33m13ebe91[m Fix frontend build: install lucide-react, fix generateQR and AuthContext imports
+[33medb6e8d[m npm run build
+[33mf3e54e1[m npm install lucide-react
+[33m9068b20[m npm run build
+[33mfd033f0[m npm run build
+[33m02c72d2[m npm run build
+[33mf58b34c[m npm run build
+[33me97508c[m npm run build
+[33m0ba297b[m npm run build
+[33mb841b8a[m npm run build
+[33m7cc3a54[m npm run build
+[33mdcc34bb[m rm -rf dist npx tsc
+[33mfeb94d4[m rm -rf dist npx tsc
+[33m0dedc4c[m rm -rf dist npx tsc
+[33m96c1b4b[m npm run build
+[33m483dd26[m npm run build
+[33ma5d3da1[m npm run build
+[33m3efcf79[m npm run build
+[33mf4d09d6[m npm run build
+[33m86bf28c[m npm run build
+[33m3d4c3b9[m npm run build
+[33m7bce8f3[m npm run build
+[33me41a150[m npm run build
+[33m3d45940[m npm run build
+[33m03f6492[m npm run build
+[33m6a9d311[m npm run build
+[33m0dbcf88[m npm run build
+[33me50ea1d[m npm run build
+[33mcdf779a[m npm run build
+[33mbcefcef[m npm run build
+[33mfb4dd11[m npm run build
+[33m4295033[m npm run build
+[33m84890bd[m npm run build
+[33m466027f[m npm run build
+[33m5f9676b[m Add Tailwind Typography plugin
+[33m031af1a[m Fix: add @tailwindcss/forms pluging and update port config
+[33md1b785f[m Installed Swiper library
+[33mf009986[m npm run build
+[33m7ad6420[m npm run build
+[33m8397b28[m npm run build
+[33mf068f08[m npm run build
+[33mb05e75b[m npm run dev
+[33m9ca70d9[m Resolve remaining AuthContext merge conflict
+[33mbd6e48f[m npm run build
+[33m7938738[m npm run build
+[33me801a5b[m npm run build ls dist/server # You should see index.js
+[33m41b0dbd[m npm install npm run build npm start
+[33m34c9b70[m npm install npm run build npm start
+[33m4a8bd28[m npm install npm run build npm start
+[33ma955536[m npm install npm run build npm start
+[33m2edfba5[m npm install npm run build npm start
+[33m1788087[m #!/bin/sh npm install npm run build npm start
+[33meec6f32[m chmod +x start.sh npm install npm run build npm start
+[33m238d5b7[m run next
+[33mdca8300[m run next
+[33mdcc98f8[m npm run dev
+[33m66bc8b3[m npm install swiper@10 # or latest compatible version
+[33mca2b77a[m npm run dev
+[33mf546d68[m npm run dev
+[33m804d3a3[m npm run dev
+[33me073103[m npm run dev
+[33m929c90a[m npm run dev
+[33m790e7d5[m npm run dev
+[33md64042c[m npm run dev
+[33m3e2eaae[m npm run dev
+[33me3dd6eb[m npm install swiper
+[33m283e411[m npm install Swiper npm run dev
+[33m09d3cf0[m npm install swiper
+[33m22b4378[m Create .gitignore
+[33m2110853[m Create .gitignore
+[33maac6b68[m node testPrisma.js
+[33md759ca2[m npx prisma db pull
+[33m720ce14[m npx prisma generate npx prisma migrate deploy npx prisma db pull
+[33md3840ac[m npm install npm run dev
+[33m3b981bc[m npm install npm run dev
+[33maefc817[m npm install npm run build
+[33m4a726f6[m npm install npm run dev
+[33me5f773b[m npm install npm run build
+[33m2d5d472[m npm install npm run dev
+[33m9c60941[m npm install npm run dev
+[33mfbafd71[m npm install npm run dev
+[33m595d506[m npm install npm run dev
+[33m3fd72a4[m npm install npm run dev
+[33m0c50883[m npm install npm run dev
+[33m4bcd1b2[m npm install npm run build
+[33mb4316d1[m npx prisma migrate dev --init
+[33mdf06e45[m npx prisma migrate dev --init
+[33mbfb1fb4[m npx prisma migrate dev --update database_url
+[33m8523db6[m npm install npm run dev
+[33m416a2c1[m npm install npx prisma migrate dev npm run dev
+[33m0bb1a0a[m npm install npx prisma migrate dev npm run dev
+[33ma2b8153[m npx prisma migrate dev --name init npx prisma migrate deploy
+[33m9a54c33[m npm install npm run build npm start
+[33m3927a44[m npm install npm run build npm start
+[33mc23b4f1[m npm run build
+[33m4298d67[m npx prisma format npx prisma generate npx prisma migrate dev --name init
+[33m1bfe651[m npx prisma migrate dev --name fix_fullname_and_payment && npx prisma migrate dev --name sync_schema_with_code
+[33m5a71b2c[m npx prisma migrate dev --name fix_fullname_and_payment && npx prisma migrate dev --name sync_schema_with_code
+[33mf247a6a[m npx prisma migrate dev --name fix_fullname_and_payment
+[33mc2c7f74[m npx prisma migrate dev --name fix_fullname_and_payment
+[33m5a8f051[m npx prisma migrate dev --name add_commission_and_provider && npm run build
+[33mc509ab8[m npx prisma validate && npm run build
+[33maef0171[m npx prisma validate
+[33m03b26ac[m npm run seed
+[33me571134[m npm run seed
+[33mf9d2776[m npm run seed
+[33m22706fb[m npx prisma migrate deploy
+[33m8981140[m npx prisma migrate dev --name init
+[33m2d31f8f[m npm install npm run dev
+[33mfa3d0dd[m npm install npm run dev
+[33mc06a1a5[m npm install npm run dev
+[33m765f07b[m npm install npm run build
+[33m2086354[m npm install npm run build
+[33m16e733c[m npm install npm run dev
+[33m0676f31[m npm install npm run dev
+[33m4709950[m npm install npm run dev
+[33m47b5f72[m npm run dev
+[33m0f4158f[m -- =============================== -- SwiftStay Nigeria PostgreSQL Schema -- ===============================  -- Users table (guests & property owners) CREATE TABLE users (     id SERIAL PRIMARY KEY,     full_name VARCHAR(255) NOT NULL,     email VARCHAR(255) UNIQUE NOT NULL,     phone VARCHAR(20),     password_hash TEXT NOT NULL,     role VARCHAR(20) DEFAULT 'guest', -- 'guest' or 'owner' or 'admin'     created_at TIMESTAMP DEFAULT NOW() );  -- Properties table CREATE TABLE properties (     id SERIAL PRIMARY KEY,     owner_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,     name VARCHAR(255) NOT NULL,     description TEXT,     location VARCHAR(255) NOT NULL,     price NUMERIC(10,2) NOT NULL,     images TEXT[], -- Array of image URLs     created_at TIMESTAMP DEFAULT NOW() );  -- Bookings table CREATE TABLE bookings (     id SERIAL PRIMARY KEY,     property_id INT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,     check_in DATE NOT NULL,     check_out DATE NOT NULL,     total_price NUMERIC(10,2) NOT NULL,     status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'confirmed', 'cancelled'     created_at TIMESTAMP DEFAULT NOW() );  -- Payments table CREATE TABLE payments (     id SERIAL PRIMARY KEY,     booking_id INT NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,     amount NUMERIC(10,2) NOT NULL,     method VARCHAR(20), -- e.g., 'Paystack', 'Flutterwave'     status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'completed', 'failed'     transaction_id VARCHAR(255),     created_at TIMESTAMP DEFAULT NOW() );  -- Optional: Reviews table CREATE TABLE reviews (     id SERIAL PRIMARY KEY,     property_id INT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,     user_id INT NOT NULL REFERENCES users(id) ON
