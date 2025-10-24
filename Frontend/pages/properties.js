@@ -11,7 +11,9 @@ export default function Properties() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const res = await api.get("/properties");
+        const api = axios.create({ 
+          baseURL: "https://swiftstaynigeria-ua1e.onrender.com/api",
+     });
         // Defensive: Ensure it's always an array
         const data = Array.isArray(res.data) ? res.data : [];
         setProperties(data);
