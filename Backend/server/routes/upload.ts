@@ -4,6 +4,8 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 
+const router = Router();
+
 // 🧠 Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -22,9 +24,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-const router = Router();
-
-// 📸 Upload single image endpoint
+// 📸 POST /api/upload → Upload single image
 router.post("/", upload.single("image"), (req: Request, res: Response) => {
   try {
     if (!req.file) {
@@ -36,7 +36,27 @@ router.post("/", upload.single("image"), (req: Request, res: Response) => {
     res.status(200).json({ imageUrl });
   } catch (err) {
     console.error("❌ Upload error:", err);
-    res.status(500).json({ message: "Upload failed", error: err instanceof Error ? err.message : err });
+    res.status(500).json({
+      message: "Upload failed",
+      error: err instanceof Error ? err.message : err,
+    });
+  }
+});
+
+// 📋 GET /api/upload → List uploaded images
+router.get("/", async (_req: Request, res: Response) => {
+  try {
+    const result = await cloudinary.api.resources({
+      type: "upload",
+      prefix: "swiftstay/properties",
+      max_results: 30,
+    });
+
+    const images = result.resources.map((r) => r.secure_url);
+    res.status(200).json({ images });
+  } catch (err) {
+    console.error("❌ Failed to fetch images:", err);
+    res.status(500).json({ error: "Failed to fetch images" });
   }
 });
 
