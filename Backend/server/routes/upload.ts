@@ -4,8 +4,6 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-const router = Router();
-
 // 🧠 Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -23,6 +21,7 @@ const storage = new CloudinaryStorage({
 });
 
 const upload = multer({ storage });
+const router = Router();
 
 // 📸 POST /api/upload → Upload single image
 router.post("/", upload.single("image"), (req: Request, res: Response) => {
@@ -44,6 +43,11 @@ router.post("/", upload.single("image"), (req: Request, res: Response) => {
 });
 
 // 📋 GET /api/upload → List uploaded images
+interface CloudinaryResource {
+  secure_url: string;
+  [key: string]: any; // include other fields if needed
+}
+
 router.get("/", async (_req: Request, res: Response) => {
   try {
     const result = await cloudinary.api.resources({
@@ -52,7 +56,7 @@ router.get("/", async (_req: Request, res: Response) => {
       max_results: 30,
     });
 
-    const images = result.resources.map((r) => r.secure_url);
+    const images = result.resources.map((r: CloudinaryResource) => r.secure_url);
     res.status(200).json({ images });
   } catch (err) {
     console.error("❌ Failed to fetch images:", err);
