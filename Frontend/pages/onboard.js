@@ -84,7 +84,7 @@ export default function Onboard() {
   return (
     <main className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-10 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
-        🏨 List Your Hotel on SwiftStay
+        🏨 Hotel Onboarding on SwiftStay
       </h1>
 
       <form
