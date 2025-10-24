@@ -1,7 +1,6 @@
 // server/routes/onboarding.ts
 import express, { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator";
-import { isWebUri } from "valid-url";
 
 const router = express.Router();
 
@@ -9,46 +8,42 @@ const router = express.Router();
 interface OnboardingRequestBody {
   name: string;
   email: string;
-  preferences?: string[];
-  website?: string; // optional URL field
+  phone: string;
+  location: string;
+  description: string;
+  price: string | number;
+  images?: string[];
 }
+
+/* GET /api/onboarding → Test route */
+router.get("/", (_req: Request, res: Response) => {
+  res.status(200).json({ message: "Onboarding route works" });
+});
 
 /* POST /api/onboarding */
 router.post(
   "/",
   [
     // Name must not be empty
-    body("name").custom((value: string) => {
-      if (typeof value !== "string" || value.trim() === "") {
-        throw new Error("Name is required");
-      }
-      return true;
-    }),
+    body("name").notEmpty().withMessage("Name is required"),
 
-    // Custom email validator
-    body("email").custom((value: string) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (typeof value !== "string" || !emailRegex.test(value)) {
-        throw new Error("Valid email required");
-      }
-      return true;
-    }),
+    // Email must be valid
+    body("email").isEmail().withMessage("Valid email required"),
 
-    // Preferences must be an array if provided
-    body("preferences").optional().custom((value: any) => {
-      if (!Array.isArray(value)) {
-        throw new Error("Preferences must be an array");
-      }
-      return true;
-    }),
+    // Phone must not be empty
+    body("phone").notEmpty().withMessage("Phone number is required"),
 
-    // Optional website URL validation using valid-url
-    body("website").optional().custom((value: string) => {
-      if (!isWebUri(value)) {
-        throw new Error("Invalid URL");
-      }
-      return true;
-    }),
+    // Location must not be empty
+    body("location").notEmpty().withMessage("Location is required"),
+
+    // Description must not be empty
+    body("description").notEmpty().withMessage("Description is required"),
+
+    // Price must not be empty and numeric
+    body("price").notEmpty().withMessage("Price is required").isNumeric().withMessage("Price must be a number"),
+
+    // Images must be an array if provided
+    body("images").optional().isArray().withMessage("Images must be an array"),
   ],
   async (req: Request<{}, {}, OnboardingRequestBody>, res: Response, next: NextFunction) => {
     try {
@@ -57,14 +52,14 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { name, email, preferences, website } = req.body;
+      const { name, email, phone, location, description, price, images } = req.body;
 
       // Example: replace with your Prisma / DB logic
-      console.log("Onboarding data:", { name, email, preferences, website });
+      console.log("Onboarding data:", { name, email, phone, location, description, price, images });
 
       res.status(201).json({
         message: "Onboarding complete",
-        user: { name, email, preferences, website },
+        user: { name, email, phone, location, description, price, images },
       });
     } catch (error: unknown) {
       console.error("Onboarding error:", error);
