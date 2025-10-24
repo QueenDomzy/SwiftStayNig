@@ -25,7 +25,7 @@ const upload = multer({ storage });
 const router = Router();
 
 // 📸 Upload single image endpoint
-router.post("/upload", upload.single("image"), (req: Request, res: Response) => {
+router.post("/", upload.single("image"), (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
