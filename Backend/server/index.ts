@@ -12,7 +12,7 @@ import bookingRoutes from "./routes/booking";
 import paymentRoutes from "./routes/payment";
 import onboardingRoutes from "./routes/onboarding";
 import aiRoutes from "./routes/aiRoutes";
-import uploadRoutes from "./routes/upload"; // 🆕 Cloudinary upload route
+import uploadRoutes from "./routes/upload"; // ✅ Cloudinary upload route
 
 dotenv.config();
 
@@ -54,7 +54,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/ai", aiRoutes);
-app.use("/api/upload", uploadRoutes); // ✅ Correct prefix: /api/upload
+app.use("/api/upload", uploadRoutes); // ✅ Correct endpoint for image uploads
 
 /* 🧹 Global Error Handler */
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
