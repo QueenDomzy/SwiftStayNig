@@ -1,26 +1,33 @@
-// server/routes/upload.ts
 import express from "express";
 import multer from "multer";
-import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
+import cloudinary from "../config/cloudinary";
+import { Request } from "express";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (_req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+// 🧠 Setup Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "swiftstay/properties",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+  } as any,
 });
+
 const upload = multer({ storage });
 
-router.post("/upload", upload.single("image"), async (req, res) => {
+// 📸 Upload single image
+router.post("/", upload.single("image"), (req: Request, res) => {
   try {
-    const filePath = req.file.path;
-    const result = await cloudinary.uploader.upload(filePath);
-    fs.unlinkSync(filePath); // remove local temp file
-    res.status(200).json({ imageUrl: result.secure_url });
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    // @ts-ignore
+    res.json({ url: req.file.path });
   } catch (err) {
-    console.error("Upload failed:", err);
-    res.status(500).json({ error: "Upload failed" });
+    console.error("❌ Upload error:", err);
+    res.status(500).json({ message: "Upload failed", error: err });
   }
 });
 
