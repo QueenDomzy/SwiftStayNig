@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
+import admin from 'firebase-admin';
 
 dotenv.config();
 const app = express();
@@ -86,12 +87,5 @@ app.get('/properties/:id', async (req, res) => {
 });
 
 // 🟢 Start server
-const PORT = process.env.PORT;
-
-if (!PORT) {
-  throw new Error("❌ Environment variable PORT is not defined. Render requires this to start the server.");
-}
-
-app.listen(PORT, () => {
-  console.log(`🚀 SwiftStay Backend running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`🚀 SwiftStay Backend running on port ${PORT}`));
