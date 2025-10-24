@@ -36,7 +36,7 @@ export default function Onboard() {
 
       try {
         const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/upload`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/upload`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -61,7 +61,7 @@ export default function Onboard() {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/onboarding`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/onboarding`,
         form,
         { headers: { "Content-Type": "application/json" } }
       );
