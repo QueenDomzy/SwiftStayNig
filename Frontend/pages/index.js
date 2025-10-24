@@ -40,7 +40,7 @@ export default function Home({ properties = [], error }) {
         {[
           { href: "/", label: "Home" },
           { href: "/properties", label: "Properties" },
-          { href: "/onboard", label: "List Your Hotel" },
+          { href: "/onboard", label: "Onboarding" },
           { href: "/login", label: "Login" },
           { href: "/signup", label: "Sign Up" },
           { href: "/dashboard", label: "Dashboard" },
