@@ -1,56 +1,25 @@
-import { Router, Request, Response } from "express";
+// server/routes/upload.ts
+import express from "express";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
 
-dotenv.config();
-const router = Router();
+const router = express.Router();
 
-/* 🧱 Setup local uploads directory */
-const uploadDir = path.join(__dirname, "..", "..", "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-/* 🧩 Configure Multer storage */
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `${uniqueSuffix}-${file.originalname}`);
-  },
+  destination: "uploads/",
+  filename: (_req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
-
 const upload = multer({ storage });
 
-/* ☁️ Configure Cloudinary (optional) */
-if (process.env.CLOUDINARY_CLOUD_NAME) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-}
-
-/* ✅ Upload endpoint */
-router.post("/upload", upload.single("file"), async (req: Request, res: Response) => {
+router.post("/upload", upload.single("image"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-
-    // If Cloudinary is configured, upload there
-    if (process.env.CLOUDINARY_CLOUD_NAME) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "swiftstay_uploads",
-      });
-      fs.unlinkSync(req.file.path);
-      return res.json({ url: result.secure_url });
-    }
-
-    // Otherwise use local file path
-    const fileUrl = `/uploads/${req.file.filename}`;
-    res.json({ url: fileUrl });
+    const filePath = req.file.path;
+    const result = await cloudinary.uploader.upload(filePath);
+    fs.unlinkSync(filePath); // remove local temp file
+    res.status(200).json({ imageUrl: result.secure_url });
   } catch (err) {
-    console.error("❌ Upload failed:", err);
+    console.error("Upload failed:", err);
     res.status(500).json({ error: "Upload failed" });
   }
 });
