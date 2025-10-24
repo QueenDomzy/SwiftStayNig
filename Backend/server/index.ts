@@ -5,8 +5,6 @@ import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import { PrismaClient } from "@prisma/client";
 
-dotenv.config();
-
 // 🧩 Route imports
 import authRoutes from "./routes/auth";
 import propertyRoutes from "./routes/property";
@@ -14,7 +12,9 @@ import bookingRoutes from "./routes/booking";
 import paymentRoutes from "./routes/payment";
 import onboardingRoutes from "./routes/onboarding";
 import aiRoutes from "./routes/aiRoutes";
-import uploadRoutes from "./routes/upload"; // 🆕 added
+import uploadRoutes from "./routes/upload"; // 🆕 Cloudinary upload route
+
+dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
@@ -54,7 +54,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/ai", aiRoutes);
-app.use("/api", uploadRoutes); // 🆕 POST /api/upload
+app.use("/api/upload", uploadRoutes); // ✅ Correct prefix: /api/upload
 
 /* 🧹 Global Error Handler */
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
