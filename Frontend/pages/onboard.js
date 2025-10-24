@@ -1,5 +1,6 @@
 // pages/onboard.js
 import { useState } from "react";
+import axios from "axios";
 
 export default function Onboard() {
   const [form, setForm] = useState({
@@ -15,57 +16,56 @@ export default function Onboard() {
   const [status, setStatus] = useState("");
   const [uploading, setUploading] = useState(false);
 
+  // Handle text inputs
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Upload images via backend /api/upload
   const handleImageUpload = async (e) => {
     const files = e.target.files;
     if (!files.length) return;
 
     setUploading(true);
+    setStatus("Uploading images...");
     const uploadedUrls = [];
 
     for (const file of files) {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_PRESET);
-      data.append("cloud_name", process.env.NEXT_PUBLIC_CLOUDINARY_CLOUDNAME);
+      const formData = new FormData();
+      formData.append("image", file);
 
       try {
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUDNAME}/image/upload`,
-          {
-            method: "POST",
-            body: data,
-          }
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/upload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
-
-        const json = await res.json();
-        if (json.secure_url) uploadedUrls.push(json.secure_url);
+        if (res.data?.imageUrl) uploadedUrls.push(res.data.imageUrl);
       } catch (err) {
-        console.error("Upload failed:", err);
+        console.error("Image upload failed:", err);
         setStatus("❌ Image upload failed. Try again.");
+        setUploading(false);
+        return;
       }
     }
 
     setForm((prev) => ({ ...prev, images: uploadedUrls }));
     setUploading(false);
-    setStatus("✅ Image(s) uploaded successfully!");
+    setStatus("✅ Images uploaded successfully!");
   };
 
+  // Submit property info
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus("Submitting...");
+    setStatus("Submitting property...");
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/properties`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/onboarding`,
+        form,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
       setStatus("✅ Property submitted successfully!");
       setForm({
         name: "",
@@ -77,7 +77,8 @@ export default function Onboard() {
         images: [],
       });
     } catch (err) {
-      setStatus("❌ " + err.message);
+      console.error("Submit failed:", err);
+      setStatus("❌ Failed to submit property.");
     }
   };
 
@@ -157,7 +158,7 @@ export default function Onboard() {
           className="w-full border p-2 rounded"
         />
 
-        {uploading && <p className="text-yellow-600 text-sm">Uploading images...</p>}
+        {uploading && <p className="text-yellow-600 text-sm">{status}</p>}
 
         {form.images.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mt-2">
@@ -172,7 +173,7 @@ export default function Onboard() {
           </div>
         )}
 
-        {status && <p className="mt-2 text-center">{status}</p>}
+        {status && !uploading && <p className="mt-2 text-center">{status}</p>}
 
         <button
           type="submit"
