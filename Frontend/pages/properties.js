@@ -1,46 +1,41 @@
 // frontend/pages/properties.js
 import { useEffect, useState } from "react";
-import api from "../utils/api";
+import axios from "axios";
 import PropertyCard from "../components/PropertyCard";
 
 export default function Properties() {
   const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+    useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const api = axios.create({ 
-          baseURL: "https://swiftstaynigeria-ua1e.onrender.com/api",
-     });
-        // Defensive: Ensure it's always an array
-        const data = Array.isArray(res.data) ? res.data : [];
-        setProperties(data);
+        const res = await axios.get(
+          `${process.env.https://swiftstaynigeria-ua1e.onrender.com/api/properties`
+        );
+        setProperties(res.data);
       } catch (err) {
         console.error("❌ Failed to load properties:", err);
         setError("Failed to load properties. Please try again later.");
-      } finally {
-        setLoading(false);
       }
     };
+
     fetchProperties();
   }, []);
 
-  if (loading)
-    return <div className="p-8 text-center text-gray-500">Loading properties...</div>;
+  if (error) {
+    return <p className="text-red-600 text-center mt-6">{error}</p>;
+  }
 
-  if (error)
-    return <div className="p-8 text-center text-red-500">{error}</div>;
-
-  if (!properties.length)
-    return <div className="p-8 text-center text-gray-500">No properties found.</div>;
+  if (!properties.length) {
+    return <p className="text-gray-500 text-center mt-6">No properties found.</p>;
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
       {properties.map((p) => (
         <PropertyCard key={p.id || p._id} property={p} />
       ))}
     </div>
   );
-      } 
+}
