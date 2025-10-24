@@ -11,8 +11,9 @@
     "skipLibCheck": true,
     "strict": true,
     "types": ["node", "express"],
-    "incremental": true
+    "incremental": true,
+    "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["server/**/*.ts", "types/**/*.d.ts"],
+  "include": ["./server", "server/prisma"],
   "exclude": ["dist", "node_modules"]
 }

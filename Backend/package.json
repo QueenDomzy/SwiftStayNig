@@ -6,9 +6,9 @@
   "license": "MIT",
   "type": "commonjs",
   "scripts": {
-    "dev": "tsx watch server/index.ts",
+    "dev": "ts-node server/index.ts",
     "build": "npx rimraf dist && tsc && prisma generate && prisma migrate deploy",
-    "start": "node dist/server/index.js",
+    "start": "node dist/server/index.ts",
     "migrate": "prisma migrate dev --name init",
     "generate": "prisma generate",
     "seed": "prisma db seed"
@@ -38,6 +38,7 @@
     "@types/node": "^24.9.1",
     "@types/valid-url": "^1.0.7",
     "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.16.0",
     "typescript": "^5.9.3"
   },

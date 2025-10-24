@@ -16,7 +16,8 @@ async function main() {
   await prisma.property.create({
     data: {
       ownerId: user.id,
-      name: "SwiftStay Hotel",
+      title: "SwiftStay ABnB Hotel", // ✅ Add this
+      propertyName: "SwiftStay Hotel",
       description: "A nice test hotel in Enugu.",
       location: "Enugu",
       price: 50000,

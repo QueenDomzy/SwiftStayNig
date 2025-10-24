@@ -24,7 +24,7 @@ router.post("/", async (req: Request<{}, {}, CreateBookingRequest>, res: Respons
 
 if (!parsed.success) {
   // Map Zod issues to an array of error messages
-  const errorMessages = parsed.error.issues.map(issue => issue.message);
+  const errorMessages = parsed.error.issues.map((issue: { message: any; }) => issue.message);
   return res.status(400).json({ errors: errorMessages });
 }
 

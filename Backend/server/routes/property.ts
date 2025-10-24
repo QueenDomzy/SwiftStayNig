@@ -1,79 +1,153 @@
-// server/routes/onboarding.ts
-import express, { Request, Response, NextFunction } from "express";
-import { body, validationResult } from "express-validator";
-import { isWebUri } from "valid-url";
+// server/routes/property.ts
+import { Router, Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
+import rateLimit from "express-rate-limit";
+import { body, param, validationResult } from "express-validator";
+import { z } from "zod";
 
-const router = express.Router();
+const prisma = new PrismaClient();
+const router = Router();
 
-// Interface for request body
-interface OnboardingRequestBody {
-  name: string;
-  email: string;
-  preferences?: string[];
-  website?: string; // optional URL field
-}
+/* 🧱 Rate limiting */
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20,             // max 20 requests per window per IP
+  message: "Too many requests from this IP, please try again later.",
+});
 
-/* POST /api/onboarding */
-router.post(
-  "/",
-  [
-    // Name must not be empty
-    body("name").custom((value) => {
-      if (typeof value !== "string" || value.trim() === "") {
-        throw new Error("Name is required");
-      }
-      return true;
-    }),
+router.use(limiter);
 
-    // Custom email validator
-    body("email").custom((value) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (typeof value !== "string" || !emailRegex.test(value)) {
-        throw new Error("Valid email required");
-      }
-      return true;
-    }),
+/* 🧾 Zod schema for property creation */
+const createPropertySchema = z.object({
+  title: z.string().min(3),
+  propertyName: z.string().min(3),
+  description: z.string().optional(),
+  price: z.number().positive(),
+  location: z.string(),
+  images: z.array(z.string()).optional(),
+  ownerId: z.number(),
+});
 
-    // Preferences must be an array if provided
-    body("preferences").optional().custom((value) => {
-      if (!Array.isArray(value)) {
-        throw new Error("Preferences must be an array");
-      }
-      return true;
-    }),
+type CreatePropertyRequest = z.infer<typeof createPropertySchema>;
 
-    // Optional website URL validation using valid-url
-    body("website").optional().custom((value) => {
-      if (!isWebUri(value)) {
-        throw new Error("Invalid URL");
-      }
-      return true;
-    }),
-  ],
-  async (req: Request<{}, {}, OnboardingRequestBody>, res: Response, next: NextFunction) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
+/* ✅ Create property */
+router.post("/", async (req: Request<{}, {}, CreatePropertyRequest>, res: Response) => {
+  try {
+    const parsed = createPropertySchema.safeParse(req.body);
 
-      const { name, email, preferences, website } = req.body;
-
-      // Example: replace with your Prisma / DB logic
-      console.log("Onboarding data:", { name, email, preferences, website });
-
-      res.status(201).json({
-        message: "Onboarding complete",
-        user: { name, email, preferences, website },
-      });
-    } catch (error: unknown) {
-      console.error("Onboarding error:", error);
-      res.status(500).json({
-        message: "Server error",
-        details: error instanceof Error ? error.message : undefined,
-      });
+    if (!parsed.success) {
+      const errorMessages = parsed.error.issues.map((issue) => issue.message);
+      return res.status(400).json({ errors: errorMessages });
     }
+
+    const { title, propertyName, description, price, location, ownerId, images} = parsed.data;
+
+    const property = await prisma.property.create({
+  data: {
+    title,   // must match the Prisma model field
+    propertyName,
+    description,
+    price,
+    location,
+    images,
+    owner: { connect: { id: ownerId } }, // relation instead of scalar
+  },
+});
+
+    res.status(201).json(property);
+  } catch (err: unknown) {
+    console.error("❌ Property creation failed:", err);
+    res.status(500).json({
+      error: "Failed to create property",
+      details: err instanceof Error ? err.message : undefined,
+    });
   }
-);
+});
+
+/* ✅ Get all properties */
+router.get("/", async (_req: Request, res: Response) => {
+  try {
+    const properties = await prisma.property.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    res.status(200).json(properties);
+  } catch (err: unknown) {
+    console.error("❌ Failed to fetch properties:", err);
+    res.status(500).json({
+      error: "Failed to fetch properties",
+      details: err instanceof Error ? err.message : undefined,
+    });
+  }
+});
+
+/* ✅ Get property by ID */
+router.get("/:id", param("id").isInt(), async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  try {
+    const id = parseInt(req.params.id, 10);
+    const property = await prisma.property.findUnique({ where: { id } });
+
+    if (!property) return res.status(404).json({ error: "Property not found" });
+
+    res.status(200).json(property);
+  } catch (err: unknown) {
+    console.error("❌ Failed to fetch property:", err);
+    res.status(500).json({
+      error: "Failed to fetch property",
+      details: err instanceof Error ? err.message : undefined,
+    });
+  }
+});
+
+/* ✅ Update property */
+router.put("/:id", param("id").isInt(), async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  try {
+    const id = parseInt(req.params.id, 10);
+    const parsed = createPropertySchema.partial().safeParse(req.body); // partial allows partial updates
+
+    if (!parsed.success) {
+      const errorMessages = parsed.error.issues.map((issue) => issue.message);
+      return res.status(400).json({ errors: errorMessages });
+    }
+
+    const property = await prisma.property.update({
+      where: { id },
+      data: parsed.data,
+    });
+
+    res.status(200).json(property);
+  } catch (err: unknown) {
+    console.error("❌ Failed to update property:", err);
+    res.status(500).json({
+      error: "Failed to update property",
+      details: err instanceof Error ? err.message : undefined,
+    });
+  }
+});
+
+/* ✅ Delete property */
+router.delete("/:id", param("id").isInt(), async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  try {
+    const id = parseInt(req.params.id, 10);
+
+    await prisma.property.delete({ where: { id } });
+
+    res.status(200).json({ message: "Property deleted successfully" });
+  } catch (err: unknown) {
+    console.error("❌ Failed to delete property:", err);
+    res.status(500).json({
+      error: "Failed to delete property",
+      details: err instanceof Error ? err.message : undefined,
+    });
+  }
+});
 
 export default router;
