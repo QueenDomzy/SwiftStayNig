@@ -1,10 +1,11 @@
-// server/index.ts
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
+import path from "path";
 import dotenv from "dotenv";
-dotenv.config();
-import { PrismaClient } from "@prisma/client";
 import rateLimit from "express-rate-limit";
+import { PrismaClient } from "@prisma/client";
+
+dotenv.config();
 
 // 🧩 Route imports
 import authRoutes from "./routes/auth";
@@ -13,6 +14,7 @@ import bookingRoutes from "./routes/booking";
 import paymentRoutes from "./routes/payment";
 import onboardingRoutes from "./routes/onboarding";
 import aiRoutes from "./routes/aiRoutes";
+import uploadRoutes from "./routes/upload"; // 🆕 added
 
 const app = express();
 const prisma = new PrismaClient();
@@ -23,7 +25,7 @@ app.set("trust proxy", 1);
 /* ✅ Rate limiter to prevent abuse */
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // each IP limited to 100 requests per window
+  max: 100, // limit each IP to 100 requests per window
   message: { error: "Too many requests, please try again later." },
 });
 app.use(limiter);
@@ -33,8 +35,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/* ✅ Serve uploaded files statically (only for local storage mode) */
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+
 /* 🩵 Health Check */
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_req: Request, res: Response) => {
   res.status(200).json({
     status: "ok",
     message: "🏡 SwiftStay API is running smoothly ✅",
@@ -49,6 +54,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api", uploadRoutes); // 🆕 POST /api/upload
 
 /* 🧹 Global Error Handler */
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
