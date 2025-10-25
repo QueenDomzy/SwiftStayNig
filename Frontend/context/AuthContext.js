@@ -3,8 +3,8 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
 
-// Use NEXT_PUBLIC_API_BASE_URL from environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+// Use NEXT_PUBLIC_API_URL from environment variables
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   /* 🧩 REGISTER NEW USER */
   const signup = async ({ full_name, email, password, role }) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ full_name, email, password, role }),
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   /* 🔐 LOGIN USER */
   const login = async (email, password) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
