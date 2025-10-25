@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext(null);
 
 // Use NEXT_PUBLIC_API_URL from environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
