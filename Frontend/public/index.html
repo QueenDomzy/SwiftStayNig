@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Local Upload - SwiftStaynig</title>
+  <style>
+    body { font-family: Arial; margin: 30px; }
+    form { border: 1px solid #ccc; padding: 20px; width: 300px; }
+    img { margin-top: 15px; max-width: 200px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h2>Upload Information & Image</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="text" name="name" placeholder="Property Name" required><br><br>
+    <textarea name="description" placeholder="Description" required></textarea><br><br>
+    <input type="file" name="image" accept="image/*" required><br><br>
+    <button type="submit">Upload</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const response = await fetch("/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      document.getElementById("result").innerHTML = `
+        <p><strong>${result.message}</strong></p>
+        <p>${result.data.name}</p>
+        <p>${result.data.description}</p>
+        <img src="${result.data.imagePath}" alt="Uploaded Image">
+      `;
+    });
+  </script>
+</body>
+</html>
