@@ -1,3 +1,3 @@
 export default function Footer() {
-  return <footer className="bg-gray-800 text-white p-4 text-center">SwiftStay Footer</footer>;
+  return <footer className="bg-gray-800 text-white p-4 text-center">SwiftStaynig Footer</footer>;
 }
