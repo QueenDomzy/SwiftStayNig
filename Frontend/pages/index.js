@@ -25,10 +25,10 @@ export default function Home({ properties = [], error }) {
 
   return (
     <main className="relative w-full min-h-screen bg-black text-white overflow-hidden">
-      {/* ✅ SwiftStay Logo */}
+      {/* ✅ SwiftStayNig Logo */}
       <div className="absolute top-6 left-8 z-50 flex items-center space-x-2">
         <img
-          src="/logo-swiftstay.png"
+          src="/logo-swiftstaynig.png"
           alt="SwiftStay Nigeria Logo"
           className="h-14 w-auto drop-shadow-lg animate-glow"
           loading="lazy"
