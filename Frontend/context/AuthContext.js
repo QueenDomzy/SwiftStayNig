@@ -3,17 +3,17 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
 
-// Use NEXT_PUBLIC_API_URL from environment variables
-const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+// ✅ Use environment variable
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
 
-  /* 🧩 REGISTER NEW USER */
+  /* 🧩 SIGNUP (CREATE NEW ACCOUNT) */
   const signup = async ({ full_name, email, password, role }) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
+      const res = await fetch(`${API_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ full_name, email, password, role }),
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   /* 🔐 LOGIN USER */
   const login = async (email, password) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
   };
 
-  /* ♻️ CHECK EXISTING SESSION ON PAGE LOAD */
+  /* ♻️ CHECK EXISTING SESSION */
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -89,4 +89,4 @@ export const useAuth = () => {
   return context;
 };
 
-export default AuthContext; 
+export default AuthContext;
