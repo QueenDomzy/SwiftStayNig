@@ -3,48 +3,55 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
 
+// Use NEXT_PUBLIC_API_BASE_URL from environment variables
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
 
   /* 🧩 REGISTER NEW USER */
   const signup = async ({ full_name, email, password, role }) => {
-    const res = await fetch("http://localhost:5000/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ full_name, email, password, role }),
-    });
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ full_name, email, password, role }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Signup failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Signup failed");
+
+      setUser(data.user);
+      return data;
+    } catch (error) {
+      console.error("Signup error:", error);
+      throw error;
     }
-
-    // Optional: auto-login after signup
-    setUser(data.user);
-    return data;
   };
 
   /* 🔐 LOGIN USER */
   const login = async (email, password) => {
-    const res = await fetch("http://localhost:5000/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Login failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Login failed");
+
+      setUser(data.user);
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      return data;
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
     }
-
-    // Save token and user info
-    setUser(data.user);
-    setToken(data.token);
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    return data;
   };
 
   /* 🚪 LOGOUT USER */
@@ -82,4 +89,4 @@ export const useAuth = () => {
   return context;
 };
 
-export default AuthContext;
+export default AuthContext; 
