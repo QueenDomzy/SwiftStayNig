@@ -12,23 +12,23 @@ export const AuthProvider = ({ children }) => {
 
   /* 🧩 SIGNUP (CREATE NEW ACCOUNT) */
   const signup = async ({ full_name, email, password, role }) => {
-    try {
-      const res = await fetch(`${API_URL}/api/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ full_name, email, password, role }),
-      });
+  try {
+    const res = await fetch(`${API_URL}/api/auth/register`, {  // 👈 changed from signup → register
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name, email, password, role }),
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Signup failed");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Signup failed");
 
-      setUser(data.user);
-      return data;
-    } catch (error) {
-      console.error("Signup error:", error);
-      throw error;
-    }
-  };
+    setUser(data.user);
+    return data;
+  } catch (error) {
+    console.error("Signup error:", error);
+    throw error;
+  }
+};
 
   /* 🔐 LOGIN USER */
   const login = async (email, password) => {
