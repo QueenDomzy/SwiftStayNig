@@ -1,48 +1,17 @@
-// server/index.ts
 import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import { authenticateUser } from "../middleware/auth";
 
-dotenv.config();
-const app = express();
+const router = express.Router();
 const prisma = new PrismaClient();
 
-// Middleware to parse JSON
-app.use(cors());
-app.use(express.json());
-
-// --------------------
-// Auth Middleware
-// --------------------
-export const authenticateUser = (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    req.user = decoded; // ✅ req.user is now typed
-    next();
-  } catch (err) {
-    return res.status(403).json({ message: "Invalid token" });
-  }
-};
-
-// --------------------
-// Auth Routes
-// --------------------
-app.post("/auth/register", async (req, res) => {
+// ✅ REGISTER
+router.post("/register", async (req, res) => {
   try {
     const { full_name, email, password } = req.body;
+
     if (!full_name || !email || !password)
       return res.status(400).json({ message: "All fields are required" });
 
@@ -61,7 +30,8 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
-app.post("/auth/login", async (req, res) => {
+// ✅ LOGIN
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
@@ -83,7 +53,8 @@ app.post("/auth/login", async (req, res) => {
   }
 });
 
-app.get("/auth/me", authenticateUser, async (req, res) => {
+// ✅ GET CURRENT USER
+router.get("/me", authenticateUser, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
@@ -94,15 +65,4 @@ app.get("/auth/me", authenticateUser, async (req, res) => {
   }
 });
 
-// --------------------
-// Root Route
-// --------------------
-app.get("/", (req, res) => res.send("SwiftStay API running ✅"));
-
-// --------------------
-// Start Server
-// --------------------
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+export default router;
