@@ -20,14 +20,16 @@ export const AuthProvider = ({ children }) => {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Signup failed");
-
-    setUser(data.user);
-    return data;
-  } catch (error) {
-    console.error("Signup error:", error);
-    throw error;
-  }
+     if (!res.ok) {
+        return { success: false, message: data.error || "Signup failed" };
+      }
+    
+     setUser(data.user);
+      return { success: true, user: data.user, message: "Signup successful" };
+    } catch (error) {
+      console.error("Signup error:", error);
+      return { success: false, message: error.message || "Signup error" };
+    }
 };
 
   /* 🔐 LOGIN USER */
@@ -40,18 +42,9 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
-
-      setUser(data.user);
-      setToken(data.token);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      return data;
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    }
+      if (!res.ok) {
+        return { success: false, message: data.error || "Invalid credentials" };
+      }
   };
 
   /* 🚪 LOGOUT USER */
