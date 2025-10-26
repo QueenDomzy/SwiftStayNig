@@ -10,7 +10,9 @@ export default function Properties() {
     useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const res = await axios.get("https://swiftstaynigeria-ua1e.onrender.com/api/properties");
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/properties`
+        );
         setProperties(res.data);
       } catch (err) {
         console.error("❌ Failed to load properties:", err);
