@@ -1,22 +1,32 @@
 // server/routes/dashboard/qr.ts
-import type { NextApiRequest, NextApiResponse } from "next";
+import { Router, Request, Response } from "express";
 import QRCode from "qrcode";
 
-type Data = { dataUrl: string } | { error: string };
+const router = Router();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+// 📌 GET /api/dashboard/qr?target=... → Generate QR code for dashboard link
+router.get("/qr", async (req: Request, res: Response) => {
   try {
-    // Use a query param ?target=... or fallback to environment variable
+    // Use query param ?target=... or fallback to env/default
     const target = (req.query.target as string) || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/dashboard";
 
-    // Optionally protect with auth here (check headers / cookies)
-    // if (!isAdmin(req)) return res.status(401).json({ error: "Unauthorized" });
+    // Optionally protect this route with auth middleware
+    // e.g., authenticateAdmin(req, res, next)
 
-    const dataUrl = await QRCode.toDataURL(target, { errorCorrectionLevel: "H", type: "image/png", margin: 2 });
+    // Generate QR code as Data URL
+    const dataUrl = await QRCode.toDataURL(target, {
+      errorCorrectionLevel: "H",
+      type: "image/png",
+      margin: 2,
+    });
+
+    // Cache headers for performance
     res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
     res.status(200).json({ dataUrl });
   } catch (err: any) {
-    console.error(err);
+    console.error("❌ Failed to generate QR:", err);
     res.status(500).json({ error: "Failed to generate QR" });
   }
-}
+});
+
+export default router;

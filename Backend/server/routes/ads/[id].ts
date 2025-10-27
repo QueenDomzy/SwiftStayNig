@@ -1,14 +1,26 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+// server/routes/ads/[id].ts
+import { Router, Request, Response } from "express";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { id } = req.query;
-  // cast to any to access ADS_STORE (shared file-scoped var above)
-  // For Next.js, each module is separate; to keep example simple, re-create or
-  // move store into a shared util in production.
-  // For simplicity here we use a rudimentary file-scoped store: (redefine)
-  // In a real app, import /lib/db to access DB.
-  // For demo we respond 404 if not found.
+const router = Router();
 
-  // NOTE: replace this waterline with DB calls.
-  res.status(501).json({ error: "Replace with DB-backed implementation" });
-}
+// 📌 GET /api/ads/:id → Fetch ad by ID
+router.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Ad ID required" });
+    }
+
+    // TODO: Replace with actual DB call using Prisma
+    // Example: const ad = await prisma.ad.findUnique({ where: { id: Number(id) } });
+
+    // For now, return placeholder response
+    res.status(501).json({ error: "Replace with DB-backed implementation" });
+  } catch (err: any) {
+    console.error("❌ Failed to fetch ad:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+export default router;

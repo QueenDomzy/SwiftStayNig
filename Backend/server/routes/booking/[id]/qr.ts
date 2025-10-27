@@ -1,24 +1,36 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+// server/routes/booking/[id]/qr.ts
+import { Router, Request, Response } from "express";
 import QRCode from "qrcode";
 
-type Data = { dataUrl: string } | { error: string };
+const router = Router();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+// 📌 GET /api/booking/:id/qr → Generate booking QR code
+router.get("/:id/qr", async (req: Request, res: Response) => {
   try {
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: "Booking id required" });
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Booking ID required" });
+    }
 
     // Build the booking confirmation URL (frontend route)
     const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const bookingUrl = `${base}/booking/confirmation/${encodeURIComponent(String(id))}`;
+    const bookingUrl = `${base}/booking/confirmation/${encodeURIComponent(id)}`;
 
-    // You can sign this URL or embed a token if you want temporary access
-    const dataUrl = await QRCode.toDataURL(bookingUrl, { errorCorrectionLevel: "M", type: "image/png", margin: 2 });
+    // Generate QR code as data URL
+    const dataUrl = await QRCode.toDataURL(bookingUrl, {
+      errorCorrectionLevel: "M",
+      type: "image/png",
+      margin: 2,
+    });
 
+    // Optional caching headers
     res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
     res.status(200).json({ dataUrl });
   } catch (err: any) {
-    console.error(err);
+    console.error("❌ Failed to generate booking QR:", err);
     res.status(500).json({ error: "Failed to generate booking QR" });
   }
-}
+});
+
+export default router;

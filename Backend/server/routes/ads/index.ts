@@ -1,4 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+// server/routes/ads/index.ts
+import { Router, Request, Response } from "express";
+
+const router = Router();
 
 type Ad = {
   id: string;
@@ -9,8 +12,10 @@ type Ad = {
   createdAt: string;
 };
 
+// In-memory store (for demo purposes, replace with DB in production)
 let ADS_STORE: Record<string, Ad> = {};
-// seed sample
+
+// Seed sample ad if empty
 if (Object.keys(ADS_STORE).length === 0) {
   const id = "ad_1";
   ADS_STORE[id] = {
@@ -23,23 +28,56 @@ if (Object.keys(ADS_STORE).length === 0) {
   };
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
-    // optional ?active=true filter
-    const active = req.query.active === "true";
-    const ads = Object.values(ADS_STORE).filter((a) => (req.query.active ? a.active === active : true));
-    return res.status(200).json({ ads });
+/* ----------------------------
+   GET /api/ads → List ads
+----------------------------- */
+router.get("/", (req: Request, res: Response) => {
+  try {
+    const activeQuery = req.query.active === "true";
+    const ads = Object.values(ADS_STORE).filter((a) =>
+      req.query.active ? a.active === activeQuery : true
+    );
+    res.status(200).json({ ads });
+  } catch (err: any) {
+    console.error("❌ Failed to fetch ads:", err);
+    res.status(500).json({ error: "Failed to fetch ads" });
   }
+});
 
-  if (req.method === "POST") {
+/* ----------------------------
+   POST /api/ads → Create ad
+----------------------------- */
+router.post("/", (req: Request, res: Response) => {
+  try {
     const { title, content, image, active } = req.body;
-    if (!title || !content) return res.status(400).json({ error: "title & content required" });
-    const id = `ad_${Date.now()}`;
-    const ad: Ad = { id, title, content, image: image || "", active: !!active, createdAt: new Date().toISOString() };
-    ADS_STORE[id] = ad;
-    return res.status(201).json({ ad });
-  }
+    if (!title || !content) {
+      return res.status(400).json({ error: "title & content required" });
+    }
 
+    const id = `ad_${Date.now()}`;
+    const ad: Ad = {
+      id,
+      title,
+      content,
+      image: image || "",
+      active: !!active,
+      createdAt: new Date().toISOString(),
+    };
+
+    ADS_STORE[id] = ad;
+    res.status(201).json({ ad });
+  } catch (err: any) {
+    console.error("❌ Failed to create ad:", err);
+    res.status(500).json({ error: "Failed to create ad" });
+  }
+});
+
+/* ----------------------------
+   Handle unsupported methods
+----------------------------- */
+router.all("/", (_req: Request, res: Response) => {
   res.setHeader("Allow", "GET,POST");
   res.status(405).end("Method Not Allowed");
-}
+});
+
+export default router;
