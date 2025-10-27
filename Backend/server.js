@@ -93,5 +93,5 @@ if (!PORT) {
 }
 
 app.listen(PORT, () => {
-  console.log(`🚀 SwiftStay Backend running on port ${PORT}`);
+  console.log(`🚀 SwiftStaynig Backend running on port ${PORT}`);
 });

@@ -87,5 +87,5 @@ app.get('/properties/:id', async (req, res) => {
 });
 
 // 🟢 Start server
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`🚀 SwiftStay Backend running on port ${PORT}`));
+const PORT = process.env.PORT || 5002;
+app.listen(PORT, () => console.log(`🚀 SwiftStaynig Backend running on port ${PORT}`));
