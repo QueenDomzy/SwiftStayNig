@@ -88,4 +88,4 @@ app.get('/properties/:id', async (req, res) => {
 
 // 🟢 Start server
 const PORT = process.env.PORT || 5002;
-app.listen(PORT, () => console.log(`🚀 SwiftStaynig Backend running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 SwiftStayNig Backend running on port ${PORT}`));

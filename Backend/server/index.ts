@@ -97,12 +97,12 @@ app.get("/auth/me", authenticateUser, async (req, res) => {
 // --------------------
 // Root Route
 // --------------------
-app.get("/", (req, res) => res.send("SwiftStaynig API running ✅"));
+app.get("/", (req, res) => res.send("SwiftStayNig API running ✅"));
 
 // --------------------
 // Start Server
 // --------------------
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 5003;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
