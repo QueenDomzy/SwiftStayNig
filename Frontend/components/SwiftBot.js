@@ -4,27 +4,27 @@ import { MessageCircle, X } from "lucide-react";
 export default function SwiftBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([{ role: "bot", text: "Hi! I'm SwiftBot 🤖 — how can I help you today?" }]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState("");const sendMessage = async (e) => {
+  e.preventDefault();
+  if (!input.trim()) return;
 
-  const sendMessage = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-    const userMessage = { role: "user", text: input };
-    setMessages([...messages, userMessage]);
-    setInput("");
+  const userMessage = { role: "user", text: input };
+  setMessages([...messages, userMessage]);
+  setInput("");
 
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
-      });
-      const data = await res.json();
-      setMessages((m) => [...m, { role: "bot", text: data.reply || "I’ll get back to you shortly!" }]);
-    } catch {
-      setMessages((m) => [...m, { role: "bot", text: "⚠️ I’m having trouble connecting to the server." }]);
-    }
-  };
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: input }), // ⚠ match backend field
+    });
+    const data = await res.json();
+    setMessages((m) => [...m, { role: "bot", text: data.reply || "I’ll get back to you shortly!" }]);
+  } catch {
+    setMessages((m) => [...m, { role: "bot", text: "⚠️ I’m having trouble connecting to the server." }]);
+  }
+};
+
 
   return (
     <>
