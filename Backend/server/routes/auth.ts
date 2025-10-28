@@ -1,4 +1,3 @@
-// server/routes/auth.ts
 import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -13,21 +12,21 @@ const router = Router();
 router.get("/", (_req: Request, res: Response) => {
   res.json({
     message: "🧩 Auth routes active",
-    routes: ["/register", "/login"],
+    routes: ["/register", "/login", "/me"],
   });
 });
 
 /* 🧾 Zod Schemas */
 const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  role: z.string().min(1),
-  full_name: z.string().min(1), // ✅ match field naming with DB
+  full_name: z.string().min(1, "Full name is required"),
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.string().optional().default("user"), // ✅ made optional
 });
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 /* 🧾 User Registration */
@@ -36,7 +35,7 @@ router.post(
   validateBody(registerSchema),
   async (req: Request<{}, {}, z.infer<typeof registerSchema>>, res: Response) => {
     try {
-      const { email, password, role, full_name } = req.body; // ✅ corrected from "fullname"
+      const { full_name, email, password, role } = req.body;
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
@@ -46,7 +45,7 @@ router.post(
       const hashedPassword = await bcrypt.hash(password, 12);
 
       const user = await prisma.user.create({
-        data: { email, password: hashedPassword, role, full_name },
+        data: { full_name, email, password: hashedPassword, role },
         select: { id: true, email: true, role: true, full_name: true },
       });
 
@@ -57,7 +56,7 @@ router.post(
     } catch (err: unknown) {
       console.error("Register error:", err);
       res.status(500).json({
-        error: "Failed to register user",
+        error: "Failed to register user.",
         details: err instanceof Error ? err.message : undefined,
       });
     }
@@ -82,9 +81,15 @@ router.post(
         return res.status(401).json({ error: "Invalid credentials." });
       }
 
+      const secret = process.env.JWT_SECRET || "swiftstay_default_secret";
       const token = jwt.sign(
-        { id: user.id, role: user.role },
-        process.env.JWT_SECRET || "default_secret",
+        {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          full_name: user.full_name,
+        },
+        secret,
         { expiresIn: "7d" }
       );
 
@@ -101,11 +106,35 @@ router.post(
     } catch (err: unknown) {
       console.error("Login error:", err);
       res.status(500).json({
-        error: "Login failed",
+        error: "Login failed.",
         details: err instanceof Error ? err.message : undefined,
       });
     }
   }
 );
+
+/* 👤 Get Current User (Protected) */
+import { authenticateUser } from "../middleware/auth";
+
+router.get("/me", authenticateUser, async (req: Request, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      select: { id: true, email: true, role: true, full_name: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.json({ user });
+  } catch (err: unknown) {
+    console.error("Get user error:", err);
+    res.status(500).json({
+      error: "Failed to fetch user info.",
+      details: err instanceof Error ? err.message : undefined,
+    });
+  }
+});
 
 export default router;
