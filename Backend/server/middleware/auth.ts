@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { Request } from "express";
+import { JwtPayload } from "jsonwebtoken";
 
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email?: string;
+  user?: JwtPayload & {
+    id: number; // 👈 match JWT payload type
+    email: string;
     full_name?: string;
     role?: string;
   };
