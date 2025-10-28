@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { validateBody } from "../middleware/validate";
+import { AuthenticatedRequest } from "../middleware/auth"; // ✅ Ensure this exists
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -21,7 +22,7 @@ const registerSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.string().optional().default("user"), // ✅ made optional
+  role: z.string().optional().default("user"), // ✅ optional
 });
 
 const loginSchema = z.object({
@@ -29,7 +30,7 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-/* 🧾 User Registration */
+/* 🧾 REGISTER USER */
 router.post(
   "/register",
   validateBody(registerSchema),
@@ -63,7 +64,7 @@ router.post(
   }
 );
 
-/* 🔐 User Login */
+/* 🔐 LOGIN USER */
 router.post(
   "/login",
   validateBody(loginSchema),
@@ -72,66 +73,67 @@ router.post(
       const { email, password } = req.body;
 
       const user = await prisma.user.findUnique({ where: { email } });
-      if (!user || !user.password) {
-        return res.status(401).json({ error: "Invalid credentials." });
+      if (!user) {
+        return res.status(400).json({ error: "Invalid email or password." });
       }
 
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: "Invalid credentials." });
+      const valid = await bcrypt.compare(password, user.password);
+      if (!valid) {
+        return res.status(400).json({ error: "Invalid email or password." });
       }
 
-      const secret = process.env.JWT_SECRET || "swiftstay_default_secret";
       const token = jwt.sign(
         {
-          id: user.id,
+          id: user.id, // ✅ number type matches Prisma + AuthenticatedRequest
           email: user.email,
-          role: user.role,
           full_name: user.full_name,
+          role: user.role,
         },
-        secret,
+        process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
 
-      res.status(200).json({
+      res.json({
         message: "✅ Login successful.",
         token,
         user: {
           id: user.id,
           email: user.email,
-          role: user.role,
           full_name: user.full_name,
+          role: user.role,
         },
       });
     } catch (err: unknown) {
       console.error("Login error:", err);
       res.status(500).json({
-        error: "Login failed.",
+        error: "Failed to login.",
         details: err instanceof Error ? err.message : undefined,
       });
     }
   }
 );
 
-/* 👤 Get Current User (Protected) */
-import { authenticateUser } from "../middleware/auth";
-
-router.get("/me", authenticateUser, async (req: Request, res: Response) => {
+/* 👤 GET CURRENT USER (Protected) */
+router.get("/me", async (req: AuthenticatedRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id: req.user!.id },
-      select: { id: true, email: true, role: true, full_name: true },
+      where: { id: req.user.id },
+      select: { id: true, email: true, full_name: true, role: true },
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found." });
+      return res.status(404).json({ error: "User not found" });
     }
 
     res.json({ user });
   } catch (err: unknown) {
-    console.error("Get user error:", err);
+    console.error("Fetch user error:", err);
     res.status(500).json({
-      error: "Failed to fetch user info.",
+      error: "Failed to fetch user.",
       details: err instanceof Error ? err.message : undefined,
     });
   }
