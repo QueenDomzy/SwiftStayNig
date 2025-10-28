@@ -1,55 +1,36 @@
-import { Request } from "express";
-import { JwtPayload } from "jsonwebtoken";
+import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 
 export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload & {
-    id: number; // 👈 match JWT payload type
-    email: string;
-    full_name?: string;
-    role?: string;
-  };
+  user?: { id: number; email: string };
 }
 
-// ✅ Middleware to authenticate users using JWT
-export const authenticateUser = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = (req: AuthenticatedRequest, res: Response) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
   try {
-    const authHeader = req.headers.authorization;
-
-    // Check for "Bearer <token>" header
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Unauthorized. Token missing." });
-    }
-
-    const token = authHeader.split(" ")[1];
-    const secret = process.env.JWT_SECRET || "swiftstay_default_secret";
-
-    // Verify JWT
+    const secret = process.env.JWT_SECRET as string;
     const decoded = jwt.verify(token, secret) as {
-      id: string;
-      email?: string;
-      full_name?: string;
-      role?: string;
-      iat?: number;
-      exp?: number;
+      id: string | number;
+      email: string;
     };
 
-    // Attach decoded user info to the request object
     req.user = {
-      id: decoded.id,
+      id: Number(decoded.id),
       email: decoded.email,
-      full_name: decoded.full_name,
-      role: decoded.role,
     };
 
-    next();
-  } catch (err: any) {
-    console.error("❌ Auth Middleware Error:", err.message);
-    return res.status(401).json({
-      error: "Invalid or expired token. Please log in again.",
+    // Instead of next(), just respond here if this middleware is the endpoint
+    return res.status(200).json({
+      message: "Token verified successfully",
+      user: req.user,
     });
+  } catch (err) {
+    return res.status(403).json({ error: "Invalid or expired token" });
   }
 };
