@@ -36,7 +36,7 @@ export default function Onboard() {
 
       try {
         const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/upload`,
+          `${process.env.NEXT_PUBLIC_API_URL}/upload`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
