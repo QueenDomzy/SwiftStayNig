@@ -11,7 +11,7 @@ export default function Properties() {
     const fetchProperties = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/properties`
+          `${process.env.NEXT_PUBLIC_API_URL}/properties`
         );
         setProperties(res.data);
       } catch (err) {
