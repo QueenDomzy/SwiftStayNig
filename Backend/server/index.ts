@@ -48,7 +48,7 @@ app.use(morgan("dev")); // ✅ logging middleware
 // --------------------
 // API Routes
 // --------------------
-app.use("/api/auth", authRoutes);
+// POST /api/auth/login
 app.use("/api/ai", aiRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/bookings", bookingRoutes);
