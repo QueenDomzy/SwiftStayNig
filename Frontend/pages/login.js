@@ -1,4 +1,5 @@
-import { useState } from "react";
+// pages/Login.js
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/router";
 
@@ -11,18 +12,14 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(null); // reset previous errors
+    setError(null);
 
-    try {
-      const result = await login(email, password);
-      if (result?.success) {
-        // Redirect to homepage or dashboard
-        router.push("/");
-      } else {
-        setError(result?.message || "Login failed. Please try again.");
-      }
-    } catch (err) {
-      setError(err?.message || "Login failed. Please try again.");
+    const result = await login(email, password);
+
+    if (result.success) {
+      router.push("/dashboard"); // Redirect after login
+    } else {
+      setError(result.message || "Login failed. Please try again.");
     }
   };
 
@@ -65,4 +62,4 @@ export default function Login() {
       </form>
     </div>
   );
-        }
+}

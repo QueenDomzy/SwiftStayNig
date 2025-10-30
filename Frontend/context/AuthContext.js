@@ -4,15 +4,15 @@ import axios from "axios";
 
 const AuthContext = createContext(null);
 
-// 👇 Environment variable for backend API
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+// 👇 Backend API base URL
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003/api";
 
-// 🧩 Create Axios instance
+// 🧩 Axios instance
 const api = axios.create({
   baseURL: API_BASE,
 });
 
-// 🔐 Automatically attach Bearer token to every request
+// 🔐 Attach token automatically
 api.interceptors.request.use((config) => {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   if (token) {
@@ -26,50 +26,39 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* 🧩 SIGNUP */
+  // Signup
   const signup = async ({ full_name, email, password, role }) => {
     try {
-      const { data } = await api.post("/auth/register", {
-        full_name,
-        email,
-        password,
-        role,
-      });
-
+      const { data } = await api.post("/auth/register", { full_name, email, password, role });
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         setToken(data.token);
         setUser(data.user);
       }
-
       return { success: true, user: data.user, message: "Signup successful" };
     } catch (error) {
-      console.error("Signup error:", error);
       return { success: false, message: error.response?.data?.error || "Signup failed" };
     }
   };
 
-  /* 🔐 LOGIN */
+  // Login
   const login = async (email, password) => {
     try {
       const { data } = await api.post("/auth/login", { email, password });
-
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         setToken(data.token);
         setUser(data.user);
       }
-
       return { success: true, user: data.user, message: "Login successful" };
     } catch (error) {
-      console.error("Login error:", error);
       return { success: false, message: error.response?.data?.error || "Login failed" };
     }
   };
 
-  /* 🚪 LOGOUT */
+  // Logout
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -77,10 +66,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
   };
 
-  /* ✅ VERIFY TOKEN / RESTORE SESSION */
+  // Verify token / restore session
   const verifySession = async () => {
     const storedToken = localStorage.getItem("token");
-
     if (!storedToken) {
       setLoading(false);
       return;
@@ -95,40 +83,26 @@ export const AuthProvider = ({ children }) => {
         logout();
       }
     } catch (error) {
-      console.warn("Session verification failed:", error);
       logout();
     } finally {
       setLoading(false);
     }
   };
 
-  /* ♻️ Run once on mount */
   useEffect(() => {
     verifySession();
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        loading,
-        signup,
-        login,
-        logout,
-        verifySession,
-      }}
-    >
+    <AuthContext.Provider value={{ user, token, loading, signup, login, logout, verifySession }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-/* ✅ Custom Hook for components */
+// Custom hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
-
-export default AuthContext;
