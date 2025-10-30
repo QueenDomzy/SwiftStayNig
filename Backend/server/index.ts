@@ -1,12 +1,15 @@
 // server/index.ts
-import dotenv from "dotenv";
-dotenv.config(); // ✅ Load env variables first
 
-import express, { Request, Response } from "express";
+import dotenv from "dotenv";
+dotenv.config(); // ✅ Load environment variables first
+
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import morgan from "morgan";
 
-// Import routes
+// --------------------
+// Import Routes
+// --------------------
 import authRoutes from "./routes/auth";
 import aiRoutes from "./routes/ai";
 import propertyRoutes from "./routes/property";
@@ -16,19 +19,21 @@ import paymentRoutes from "./routes/payment";
 import uploadRoutes from "./routes/upload";
 import userRoutes from "./routes/user";
 
-// Import auth middleware for protected routes
+// --------------------
+// Import Middleware
+// --------------------
 import { authenticateUser } from "./middleware/auth";
 
 const app = express();
 
 // --------------------
-// Middleware
+// Middleware Setup
 // --------------------
 app.use(
   cors({
     origin: [
-      "https://swiftstaynigeria-frontend.onrender.com", // ✅ your frontend
-      "http://localhost:5173", // ✅ optional for local dev (Vite)
+      "https://swiftstaynigeria-frontend.onrender.com", // ✅ production frontend
+      "http://localhost:5173", // ✅ local dev (Vite)
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
@@ -38,7 +43,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan("dev")); // logging middleware
+app.use(morgan("dev")); // ✅ logging middleware
 
 // --------------------
 // API Routes
@@ -51,7 +56,7 @@ app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/upload", uploadRoutes);
 
-// ✅ Protected routes — these will require authentication
+// ✅ Protected routes
 app.use("/api/user", authenticateUser, userRoutes);
 
 // --------------------
@@ -62,9 +67,9 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 // --------------------
-// Global Error Handler (no NextFunction)
+// Global Error Handler
 // --------------------
-app.use((err: any, _req: Request, res: Response) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error("🌋 Global error handler:", err);
   res.status(err.status || 500).json({
     error: err.message || "Internal Server Error",
@@ -79,47 +84,5 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
-export default app;);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan("dev")); // logging middleware
-
-// --------------------
-// API Routes
-// --------------------
-app.use("/api/auth", authRoutes);
-app.use("/api/ai", aiRoutes);
-app.use("/api/properties", propertyRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/onboarding", onboardingRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/user", authenticateUser, userRoutes);
-
-// --------------------
-// Health Check / Root
-// --------------------
-app.get("/", (_req: Request, res: Response) => {
-  res.send("🚀 SwiftStayNig API running ✅");
-});
-
-// --------------------
-// Global Error Handler
-// --------------------
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error("Global error handler:", err);
-  res.status(err.status || 500).json({
-    error: err.message || "Internal Server Error",
-  });
-});
-
-// --------------------
-// Start Server
-// --------------------
-const PORT = process.env.PORT || 5003;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
-
+// ✅ Only one default export allowed
 export default app;
