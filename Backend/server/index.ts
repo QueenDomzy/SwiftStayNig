@@ -1,13 +1,11 @@
 // server/index.ts
-
 import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
 
 // 🧩 Import routes
-import loginRoutes from "./routes/auth/login";
-import signupRoutes from "./routes/auth/signup";
+import authRoutes from "./routes/auth"; // combined login & signup
 import aiRoutes from "./routes/ai";
 import propertyRoutes from "./routes/property";
 import bookingRoutes from "./routes/booking";
@@ -35,6 +33,56 @@ app.use(morgan("dev")); // logging middleware
 // API ROUTES
 // --------------------
 
+// ✅ Auth (single combined file handles /login, /register, /me)
+app.use("/api/auth", authRoutes);
+
+// ✅ AI
+app.use("/api/ai", aiRoutes);
+
+// ✅ Properties
+app.use("/api/properties", propertyRoutes);
+
+// ✅ Bookings
+app.use("/api/bookings", bookingRoutes);
+
+// ✅ Onboarding
+app.use("/api/onboarding", onboardingRoutes);
+
+// ✅ Payments
+app.use("/api/payments", paymentRoutes);
+
+// ✅ Uploads
+app.use("/api/upload", uploadRoutes);
+
+// ✅ User profile (protected)
+app.use("/api/user", authenticateUser, userRoutes);
+
+// --------------------
+// HEALTH CHECK / ROOT
+// --------------------
+app.get("/", (_req: Request, res: Response) => {
+  res.send("🚀 SwiftStayNig API running ✅");
+});
+
+// --------------------
+// GLOBAL ERROR HANDLER
+// --------------------
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("Global error handler:", err);
+  res.status(err.status || 500).json({
+    error: err.message || "Internal Server Error",
+  });
+});
+
+// --------------------
+// START SERVER
+// --------------------
+const PORT = process.env.PORT || 5003;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+export default app;
 // ✅ Auth (split by concern)
 app.use("/api/auth", loginRoutes);
 app.use("/api/auth", signupRoutes);
