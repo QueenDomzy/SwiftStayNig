@@ -4,12 +4,14 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { validateBody } from "../middleware/validate";
-import { authenticateUser, AuthenticatedRequest } from "../middleware/auth"; // ensure middleware exists
+import { AuthenticatedRequest } from "../middleware/auth"; // optional if you use /me
 
 const prisma = new PrismaClient();
 const router = Router();
 
-/* 🩵 Route Health Check */
+/* ---------------------
+   Health Check
+--------------------- */
 router.get("/", (_req: Request, res: Response) => {
   res.json({
     message: "🧩 Auth routes active",
@@ -17,7 +19,9 @@ router.get("/", (_req: Request, res: Response) => {
   });
 });
 
-/* 🧾 Zod Schemas */
+/* ---------------------
+   Zod Schemas
+--------------------- */
 const registerSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email format"),
@@ -30,7 +34,9 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-/* 🧾 REGISTER USER */
+/* ---------------------
+   REGISTER USER
+--------------------- */
 router.post(
   "/register",
   validateBody(registerSchema),
@@ -39,33 +45,29 @@ router.post(
       const { full_name, email, password, role } = req.body;
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
-      if (existingUser) return res.status(400).json({ error: "User already exists." });
+      if (existingUser) return res.status(400).json({ error: "User already exists" });
 
       const hashedPassword = await bcrypt.hash(password, 12);
+
       const user = await prisma.user.create({
         data: { full_name, email, password: hashedPassword, role },
         select: { id: true, full_name: true, email: true, role: true },
       });
 
-      // generate token
-      const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        process.env.JWT_SECRET!,
-        { expiresIn: "7d" }
-      );
-
-      res.status(201).json({ message: "Registration successful", token, user });
-    } catch (err: unknown) {
-      console.error("Register error:", err);
-      res.status(500).json({
-        error: "Failed to register user",
-        details: err instanceof Error ? err.message : undefined,
+      res.status(201).json({
+        message: "✅ Registration successful",
+        user,
       });
+    } catch (err) {
+      console.error("Register error:", err);
+      res.status(500).json({ error: "Failed to register user" });
     }
   }
 );
 
-/* 🔐 LOGIN USER */
+/* ---------------------
+   LOGIN USER
+--------------------- */
 router.post(
   "/login",
   validateBody(loginSchema),
@@ -86,22 +88,21 @@ router.post(
       );
 
       res.json({
-        message: "Login successful",
+        message: "✅ Login successful",
         token,
         user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role },
       });
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("Login error:", err);
-      res.status(500).json({
-        error: "Failed to login",
-        details: err instanceof Error ? err.message : undefined,
-      });
+      res.status(500).json({ error: "Failed to login" });
     }
   }
 );
 
-/* 👤 GET CURRENT USER (Protected) */
-router.get("/me", authenticateUser, async (req: AuthenticatedRequest, res: Response) => {
+/* ---------------------
+   GET CURRENT USER (/me) - Protected
+--------------------- */
+router.get("/me", async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
@@ -113,12 +114,9 @@ router.get("/me", authenticateUser, async (req: AuthenticatedRequest, res: Respo
     if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json({ user });
-  } catch (err: unknown) {
+  } catch (err) {
     console.error("Fetch user error:", err);
-    res.status(500).json({
-      error: "Failed to fetch user",
-      details: err instanceof Error ? err.message : undefined,
-    });
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 });
 
