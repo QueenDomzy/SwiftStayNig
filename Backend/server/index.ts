@@ -33,7 +33,7 @@ app.use(
   cors({
     origin: [
       "https://swiftstaynigeria-frontend.onrender.com", // ✅ production frontend
-      "http://localhost:5173", // ✅ local dev (Vite)
+      "http://localhost:3000", // ✅ local dev (Vite)
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
@@ -49,6 +49,7 @@ app.use(morgan("dev")); // ✅ logging middleware
 // API Routes
 // --------------------
 // POST /api/auth/login
+app.use("/api/auth", authRoutes); // ✅ backward compatibility
 app.use("/api/ai", aiRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/bookings", bookingRoutes);
