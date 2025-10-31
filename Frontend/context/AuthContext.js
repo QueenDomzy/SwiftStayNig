@@ -5,7 +5,7 @@ import axios from "axios";
 const AuthContext = createContext(null);
 
 // 👇 Backend API base URL
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5003";
 
 // 🧩 Axios instance
 const api = axios.create({
