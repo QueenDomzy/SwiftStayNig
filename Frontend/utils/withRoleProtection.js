@@ -1,17 +1,43 @@
+import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
-export function withRoleProtection(Component, allowedRoles) {
-  return function ProtectedPage(props) {
+/**
+ * HOC — Protects routes by user role.
+ * Usage:
+ * export default withRoleProtection(AdminDashboard, ["admin"]);
+ */
+
+export default function withRoleProtection(WrappedComponent, allowedRoles = []) {
+  return function ProtectedComponent(props) {
+    const { user, loading } = useAuth();
     const router = useRouter();
-    const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
 
     useEffect(() => {
-      if (!role || !allowedRoles.includes(role)) {
-        router.push("/unauthorized");
+      if (!loading) {
+        if (!user) {
+          router.replace("/login"); // redirect to login
+        } else if (!allowedRoles.includes(user.role.toLowerCase())) {
+          // redirect based on role mismatch
+          switch (user.role.toLowerCase()) {
+            case "hotel":
+              router.replace("/property/dashboard");
+              break;
+            case "guest":
+              router.replace("/guest/dashboard");
+              break;
+            case "admin":
+              router.replace("/admin/dashboard");
+              break;
+            default:
+              router.replace("/");
+          }
+        }
       }
-    }, [role, router]);
+    }, [user, loading, router]);
 
-    return <Component {...props} />;
+    if (loading || !user) return <p className="text-center mt-10">Loading...</p>;
+
+    return <WrappedComponent {...props} />;
   };
 }
