@@ -85,7 +85,7 @@ export default function Onboard() {
   return (
     <main className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-10 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
-        🏨 Hotel Onboarding on SwiftStay
+        🏨 Property Onboarding on SwiftStay
       </h1>
 
       <form
@@ -123,7 +123,7 @@ export default function Onboard() {
 
         <input
           name="location"
-          placeholder="Hotel Location"
+          placeholder="Property Location"
           onChange={handleChange}
           value={form.location}
           className="w-full border p-2 rounded"
@@ -132,7 +132,7 @@ export default function Onboard() {
 
         <textarea
           name="description"
-          placeholder="Hotel Description"
+          placeholder="Property Description"
           onChange={handleChange}
           value={form.description}
           className="w-full border p-2 rounded"
@@ -149,7 +149,7 @@ export default function Onboard() {
           required
         />
 
-        <label className="block text-gray-700">Upload Hotel Images</label>
+        <label className="block text-gray-700">Upload Property Images</label>
         <input
           type="file"
           multiple
