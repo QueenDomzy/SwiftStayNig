@@ -3,9 +3,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PropertyCard from "../components/PropertyCard";
 
+// ✅ Static Generation (ISR)
 export async function getStaticProps() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/property`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
     if (!res.ok) throw new Error(`Server responded with ${res.status}`);
     const properties = await res.json();
     return { props: { initialProperties: properties }, revalidate: 600 };
@@ -22,9 +23,7 @@ export default function PropertiesPage({ initialProperties }) {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/properties`
-        );
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
         setProperties(res.data);
       } catch (err) {
         console.error("❌ Failed to load properties:", err.message);
