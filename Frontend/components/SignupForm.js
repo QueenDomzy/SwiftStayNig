@@ -13,7 +13,7 @@ export default function SignupForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", form);
+      const res = await axios.post("http://localhost:5003/api/auth/register", form);
       setMessage(res.data.message);
     } catch (err) {
       setMessage(err.response?.data?.error || "Registration failed.");
@@ -46,8 +46,8 @@ export default function SignupForm() {
         onChange={(e) => setForm({ ...form, role: e.target.value })}
       >
         <option value="guest">Guest (User)</option>
-        <option value="hotel">Hotel Owner</option>
-        <option value="admin">SwiftStay Admin</option>
+        <option value="property">Property Owner</option>
+        <option value="admin">Super Admin</option>
       </select>
 
       <button type="submit">Register</button>
