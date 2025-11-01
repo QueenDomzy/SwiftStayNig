@@ -20,7 +20,6 @@ export default function PropertiesPage({ initialProperties }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Revalidate client-side data after static generation
     const fetchProperties = async () => {
       try {
         const res = await axios.get(
@@ -41,7 +40,11 @@ export default function PropertiesPage({ initialProperties }) {
   }
 
   if (!properties.length) {
-    return <p className="text-gray-500 text-center mt-6">No properties found.</p>;
+    return (
+      <p className="text-gray-500 text-center mt-6">
+        No properties found.
+      </p>
+    );
   }
 
   return (
