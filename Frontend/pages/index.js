@@ -119,7 +119,7 @@ export default function Home({ properties = [], error }) {
 
 /* ✅ Static Generation with Revalidation & Error Graceful Fallback */
 export async function getStaticProps() {
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/properties`;
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/properties`;
   let properties = [];
   let error = null;
 
