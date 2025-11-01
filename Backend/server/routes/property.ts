@@ -1,4 +1,3 @@
-// server/routes/property.ts
 import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import rateLimit from "express-rate-limit";
@@ -67,7 +66,6 @@ router.get("/", async (_req: Request, res: Response) => {
     const properties = await prisma.property.findMany({
       orderBy: { createdAt: "desc" },
     });
-    // ✅ Return array directly for clean frontend mapping
     res.status(200).json(properties);
   } catch (err) {
     console.error("❌ Failed to fetch properties:", err);
