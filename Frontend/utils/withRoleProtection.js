@@ -2,13 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-/**
- * HOC — Protects routes by user role.
- * Usage:
- * export default withRoleProtection(AdminDashboard, ["admin"]);
- */
-
-export default function withRoleProtection(WrappedComponent, allowedRoles = []) {
+export function withRoleProtection(WrappedComponent, allowedRoles = []) {
   return function ProtectedComponent(props) {
     const { user, loading } = useAuth();
     const router = useRouter();
@@ -16,10 +10,9 @@ export default function withRoleProtection(WrappedComponent, allowedRoles = []) 
     useEffect(() => {
       if (!loading) {
         if (!user) {
-          router.replace("/login"); // redirect to login
-        } else if (!allowedRoles.includes(user.role.toLowerCase())) {
-          // redirect based on role mismatch
-          switch (user.role.toLowerCase()) {
+          router.replace("/login");
+        } else if (!allowedRoles.includes(user.role?.toLowerCase())) {
+          switch (user.role?.toLowerCase()) {
             case "hotel":
               router.replace("/property/dashboard");
               break;
