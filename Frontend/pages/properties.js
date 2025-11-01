@@ -5,7 +5,7 @@ import PropertyCard from "../components/PropertyCard";
 
 export async function getStaticProps() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/property`);
     if (!res.ok) throw new Error(`Server responded with ${res.status}`);
     const properties = await res.json();
     return { props: { initialProperties: properties }, revalidate: 600 };
