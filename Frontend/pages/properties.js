@@ -28,7 +28,7 @@ export default function PropertiesPage({ initialProperties }) {
         );
         setProperties(res.data);
       } catch (err) {
-        console.error("❌ Failed to load properties:", err);
+        console.error("❌ Failed to load properties:", err.message);
         setError("Failed to load properties. Please try again later.");
       }
     };
@@ -46,36 +46,14 @@ export default function PropertiesPage({ initialProperties }) {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4 text-center">Available Properties</h1>
+      <h1 className="text-2xl font-semibold mb-4 text-center">
+        Available Properties
+      </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {properties.map((p) => (
           <PropertyCard key={p.id || p._id} property={p} />
         ))}
       </div>
-    </div>
-  );
-}
-
-        setError("Failed to load properties. Please try again later.");
-      }
-    };
-
-    fetchProperties();
-  }, []);
-
-  if (error) {
-    return <p className="text-red-600 text-center mt-6">{error}</p>;
-  }
-
-  if (!properties.length) {
-    return <p className="text-gray-500 text-center mt-6">No properties found.</p>;
-  }
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-      {properties.map((p) => (
-        <PropertyCard key={p.id || p._id} property={p} />
-      ))}
     </div>
   );
 }
