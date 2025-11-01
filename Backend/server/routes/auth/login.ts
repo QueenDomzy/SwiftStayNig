@@ -18,23 +18,21 @@ const loginSchema = z.object({
 router.post(
   "/login",
   validateBody(loginSchema),
-  async (req: Request, res: Response) => {
+  async (req: Request<{}, {}, z.infer<typeof loginSchema>>, res: Response) => {
     try {
       const { email, password } = req.body;
 
-      // 🔎 Check user existence
       const user = await prisma.user.findUnique({ where: { email } });
       if (!user) {
-        return res.status(400).json({ error: "Invalid email or password" });
+        return res.status(400).json({ error: "Invalid email or password." });
       }
 
-      // 🔑 Compare passwords
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) {
-        return res.status(400).json({ error: "Invalid email or password" });
+        return res.status(400).json({ error: "Invalid email or password." });
       }
 
-      // 🔐 Sign JWT token
+      // Generate JWT token
       const token = jwt.sign(
         {
           id: user.id,
@@ -42,29 +40,38 @@ router.post(
           full_name: user.full_name,
           role: user.role,
         },
-        process.env.JWT_SECRET as string,
+        process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
 
-      // ✅ Success
-      return res.status(200).json({
-        message: "Login successful",
+      // Role-based welcome message
+      let message = "";
+      if (user.role === "hotel")
+        message = `🏨 Welcome, ${user.full_name}! Access your hotel dashboard and QR tools.`;
+      else if (user.role === "admin")
+        message = `👑 Welcome back, Superadmin (${user.full_name}) — manage SwiftStay operations.`;
+      else
+        message = `🧳 Welcome, ${user.full_name}! Browse and book your next stay.`;
+
+      res.json({
+        message,
         token,
         user: {
           id: user.id,
-          full_name: user.full_name,
           email: user.email,
+          full_name: user.full_name,
           role: user.role,
         },
       });
-    } catch (error) {
-      console.error("Login error:", error);
-      return res.status(500).json({
-        error: "Internal server error during login",
-        details: error instanceof Error ? error.message : error,
+    } catch (err: unknown) {
+      console.error("Login error:", err);
+      res.status(500).json({
+        error: "Failed to login.",
+        details: err instanceof Error ? err.message : undefined,
       });
     }
   }
 );
 
 export default router;
+
