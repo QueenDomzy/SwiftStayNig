@@ -4,29 +4,25 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { validateBody } from "../middleware/validate";
-import { AuthenticatedRequest } from "../middleware/auth"; // optional if you use /me
+import { AuthenticatedRequest } from "../middleware/auth";
 
 const prisma = new PrismaClient();
 const router = Router();
 
-/* ---------------------
-   Health Check
---------------------- */
+/* 🩵 Route Health Check */
 router.get("/", (_req: Request, res: Response) => {
   res.json({
-    message: "🧩 Auth routes active",
+    message: "🧩 SwiftStay Auth routes active",
     routes: ["/register", "/login", "/me"],
   });
 });
 
-/* ---------------------
-   Zod Schemas
---------------------- */
+/* 🧾 Zod Schemas */
 const registerSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.string().optional().default("user"),
+  role: z.enum(["guest", "hotel", "admin"]).optional().default("guest"), // ✅ SwiftStay roles
 });
 
 const loginSchema = z.object({
@@ -34,9 +30,7 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-/* ---------------------
-   REGISTER USER
---------------------- */
+/* 🧾 REGISTER USER */
 router.post(
   "/register",
   validateBody(registerSchema),
@@ -44,30 +38,36 @@ router.post(
     try {
       const { full_name, email, password, role } = req.body;
 
+      // Check if user already exists
       const existingUser = await prisma.user.findUnique({ where: { email } });
-      if (existingUser) return res.status(400).json({ error: "User already exists" });
+      if (existingUser) {
+        return res.status(400).json({ error: "User already exists." });
+      }
 
+      // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
 
+      // Create user
       const user = await prisma.user.create({
         data: { full_name, email, password: hashedPassword, role },
-        select: { id: true, full_name: true, email: true, role: true },
+        select: { id: true, email: true, role: true, full_name: true },
       });
 
       res.status(201).json({
-        message: "✅ Registration successful",
+        message: `✅ ${role === "hotel" ? "Hotel owner" : role === "admin" ? "Admin" : "Guest"} registered successfully.`,
         user,
       });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Register error:", err);
-      res.status(500).json({ error: "Failed to register user" });
+      res.status(500).json({
+        error: "Failed to register user.",
+        details: err instanceof Error ? err.message : undefined,
+      });
     }
   }
 );
 
-/* ---------------------
-   LOGIN USER
---------------------- */
+/* 🔐 LOGIN USER */
 router.post(
   "/login",
   validateBody(loginSchema),
@@ -76,47 +76,72 @@ router.post(
       const { email, password } = req.body;
 
       const user = await prisma.user.findUnique({ where: { email } });
-      if (!user) return res.status(400).json({ error: "Invalid email or password" });
+      if (!user) {
+        return res.status(400).json({ error: "Invalid email or password." });
+      }
 
       const valid = await bcrypt.compare(password, user.password);
-      if (!valid) return res.status(400).json({ error: "Invalid email or password" });
+      if (!valid) {
+        return res.status(400).json({ error: "Invalid email or password." });
+      }
 
       const token = jwt.sign(
-        { id: user.id, email: user.email, full_name: user.full_name, role: user.role },
+        {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          role: user.role,
+        },
         process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
 
       res.json({
-        message: "✅ Login successful",
+        message: `✅ Login successful as ${user.role.toUpperCase()}.`,
         token,
-        user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role },
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          role: user.role,
+        },
       });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
-      res.status(500).json({ error: "Failed to login" });
+      res.status(500).json({
+        error: "Failed to login.",
+        details: err instanceof Error ? err.message : undefined,
+      });
     }
   }
 );
 
-/* ---------------------
-   GET CURRENT USER (/me) - Protected
---------------------- */
+/* 👤 GET CURRENT USER (Protected) */
 router.get("/me", async (req: AuthenticatedRequest, res: Response) => {
   try {
-    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, full_name: true, email: true, role: true },
+      select: { id: true, email: true, full_name: true, role: true },
     });
 
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-    res.json({ user });
-  } catch (err) {
+    res.json({
+      message: `👋 Welcome back, ${user.full_name} (${user.role}).`,
+      user,
+    });
+  } catch (err: unknown) {
     console.error("Fetch user error:", err);
-    res.status(500).json({ error: "Failed to fetch user" });
+    res.status(500).json({
+      error: "Failed to fetch user.",
+      details: err instanceof Error ? err.message : undefined,
+    });
   }
 });
 
