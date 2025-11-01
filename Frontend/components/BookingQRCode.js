@@ -14,7 +14,7 @@ export default function BookingQRCode({ bookingId }) {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/booking/${encodeURIComponent(bookingId)}/qr`);
+        const res = await fetch(`/api/bookings/${encodeURIComponent(bookingId)}/qr`);
         if (!res.ok) throw new Error("Failed to fetch QR");
         const json = await res.json();
         if (mounted) setDataUrl(json.dataUrl);
