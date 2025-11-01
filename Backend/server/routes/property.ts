@@ -1,21 +1,13 @@
+// server/routes/property.ts
 import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import rateLimit from "express-rate-limit";
 import { param, validationResult } from "express-validator";
 import { z } from "zod";
 
 const prisma = new PrismaClient();
 const router = Router();
 
-/* 🧱 Rate Limiting */
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 20, // max 20 requests per IP per minute
-  message: "Too many requests from this IP, please try again later.",
-});
-router.use(limiter);
-
-/* 🧾 Zod Schema for Property Creation/Update */
+/* 🧾 Zod Schema for Property Validation */
 const propertySchema = z.object({
   title: z.string().min(3),
   propertyName: z.string().min(3),
@@ -66,6 +58,11 @@ router.get("/", async (_req: Request, res: Response) => {
     const properties = await prisma.property.findMany({
       orderBy: { createdAt: "desc" },
     });
+
+    if (!properties || properties.length === 0) {
+      return res.status(404).json({ message: "No properties found" });
+    }
+
     res.status(200).json(properties);
   } catch (err) {
     console.error("❌ Failed to fetch properties:", err);
