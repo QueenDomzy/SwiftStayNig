@@ -39,7 +39,7 @@ export default function Dashboard() {
         {qr ? (
           <img
             src={qr}
-            alt="Hotel QR"
+            alt="Property QR"
             className="mx-auto border rounded-lg shadow-md"
           />
         ) : (
