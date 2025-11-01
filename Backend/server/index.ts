@@ -42,7 +42,7 @@ app.use("/api/user", authenticateUser, userRoutes);
 // Health Check
 // --------------------
 app.get("/", (_req: Request, res: Response) => {
-  res.send("🚀 SwiftStayNig API running ✅");
+  res.send("🚀 SwiftStayNig Backend Running ✅");
 });
 
 // --------------------
