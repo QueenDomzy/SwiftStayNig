@@ -53,13 +53,14 @@ router.post(
         select: { id: true, email: true, role: true, full_name: true },
       });
 
-      // Dynamic role-based message
-      const message =
-        role === "hotel"
-          ? "🏨 Your hotel account has been successfully registered. Scan your Hotel QR to onboard your property or share with guests."
-          : role === "admin"
-          ? "👑 Admin account created successfully for SwiftStay Nigeria."
-          : "🧳 Guest account registered successfully. Welcome to SwiftStay!";
+      // Dynamic message per role
+      let message = "";
+      if (role === "hotel")
+        message = `🏨 Your hotel account has been successfully registered. Welcome, ${user.full_name}! Access your hotel dashboard and QR tools.`;
+      else if (role === "admin")
+        message = `👑 Admin account created successfully for SwiftStay Nigeria. Welcome, ${user.full_name}! Manage SwiftStay operations.`;
+      else
+        message = `🧳 Guest account registered successfully. Welcome, ${user.full_name}! Browse and book your next stay.`;
 
       res.status(201).json({ message, user });
     } catch (err: unknown) {
@@ -90,7 +91,7 @@ router.post(
         return res.status(400).json({ error: "Invalid email or password." });
       }
 
-      // Generate token
+      // Generate JWT token
       const token = jwt.sign(
         {
           id: user.id,
@@ -102,13 +103,14 @@ router.post(
         { expiresIn: "7d" }
       );
 
-      // Dynamic login message
-      const message =
-        user.role === "hotel"
-          ? `🏨 Welcome, ${user.full_name}! Access your hotel dashboard and QR tools.`
-          : user.role === "admin"
-          ? `👑 Welcome back, Superadmin (${user.full_name}) — manage SwiftStay operations.`
-          : `🧳 Welcome, ${user.full_name}! Browse and book your next stay.`;
+      // Role-based welcome message
+      let message = "";
+      if (user.role === "hotel")
+        message = `🏨 Welcome, ${user.full_name}! Access your hotel dashboard and QR tools.`;
+      else if (user.role === "admin")
+        message = `👑 Welcome back, Superadmin (${user.full_name}) — manage SwiftStay operations.`;
+      else
+        message = `🧳 Welcome, ${user.full_name}! Browse and book your next stay.`;
 
       res.json({
         message,
