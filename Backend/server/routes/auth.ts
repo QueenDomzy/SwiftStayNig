@@ -38,7 +38,7 @@ router.post(
     try {
       const { full_name, email, password, role } = req.body;
 
-      // Check if user already exists
+      // Check for existing user
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         return res.status(400).json({ error: "User already exists." });
@@ -53,10 +53,15 @@ router.post(
         select: { id: true, email: true, role: true, full_name: true },
       });
 
-      res.status(201).json({
-        message: `✅ ${role === "hotel" ? "Hotel owner" : role === "admin" ? "Admin" : "Guest"} registered successfully.`,
-        user,
-      });
+      // Dynamic role-based message
+      const message =
+        role === "hotel"
+          ? "🏨 Your hotel account has been successfully registered. Scan your Hotel QR to onboard your property or share with guests."
+          : role === "admin"
+          ? "👑 Admin account created successfully for SwiftStay Nigeria."
+          : "🧳 Guest account registered successfully. Welcome to SwiftStay!";
+
+      res.status(201).json({ message, user });
     } catch (err: unknown) {
       console.error("Register error:", err);
       res.status(500).json({
@@ -85,6 +90,7 @@ router.post(
         return res.status(400).json({ error: "Invalid email or password." });
       }
 
+      // Generate token
       const token = jwt.sign(
         {
           id: user.id,
@@ -96,8 +102,16 @@ router.post(
         { expiresIn: "7d" }
       );
 
+      // Dynamic login message
+      const message =
+        user.role === "hotel"
+          ? `🏨 Welcome, ${user.full_name}! Access your hotel dashboard and QR tools.`
+          : user.role === "admin"
+          ? `👑 Welcome back, Superadmin (${user.full_name}) — manage SwiftStay operations.`
+          : `🧳 Welcome, ${user.full_name}! Browse and book your next stay.`;
+
       res.json({
-        message: `✅ Login successful as ${user.role.toUpperCase()}.`,
+        message,
         token,
         user: {
           id: user.id,
