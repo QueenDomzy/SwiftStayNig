@@ -6,9 +6,10 @@ import PropertyCard from "../components/PropertyCard";
 // ✅ Static Generation (ISR)
 export async function getStaticProps() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/properties`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
     if (!res.ok) throw new Error(`Server responded with ${res.status}`);
     const properties = await res.json();
+
     return { props: { initialProperties: properties }, revalidate: 600 };
   } catch (error) {
     console.error("❌ Failed to fetch properties:", error.message);
@@ -23,7 +24,7 @@ export default function PropertiesPage({ initialProperties }) {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/properties`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
         setProperties(res.data);
       } catch (err) {
         console.error("❌ Failed to load properties:", err.message);
