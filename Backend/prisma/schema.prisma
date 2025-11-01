@@ -21,6 +21,13 @@ model User {
   reviews          Review[]
 }
 
+enum Role {
+  GUEST
+  HOTEL
+  ADMIN
+}
+
+
 model Property {
   id            Int      @id @default(autoincrement())
   title         String   // ✅ required
