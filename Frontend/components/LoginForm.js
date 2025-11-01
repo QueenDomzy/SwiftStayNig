@@ -11,7 +11,7 @@ export default function LoginForm() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+      const res = await axios.post("http://localhost:5003/api/auth/login", { email, password });
       const { token, user } = res.data;
 
       localStorage.setItem("token", token);
@@ -19,8 +19,8 @@ export default function LoginForm() {
 
       setMessage(res.data.message);
 
-      if (user.role === "HOTEL") router.push("/hotel/dashboard");
-      else if (user.role === "ADMIN") router.push("/admin/dashboard");
+      if (user.role === "Owner") router.push("/property/dashboard");
+      else if (user.role === "Admin") router.push("/admin/dashboard");
       else router.push("/guest/dashboard");
     } catch (err) {
       setMessage(err.response?.data?.error || "Login failed.");
