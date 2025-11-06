@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "rootDir": "server",
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "incremental": true,
+    "types": ["node", "express"],
+    "typeRoots": ["./server/types", "./node_modules/@types"]
+  },
+  "include": ["server", "server/prisma"],
+  "exclude": ["dist", "node_modules"]
+}

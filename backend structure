@@ -1,0 +1,15 @@
+swiftstay-backend/
+│── package.json
+│── prisma/
+│   └── schema.prisma
+│── server/
+│   ├── index.ts
+│   ├── routes/
+│   │   ├── auth.ts
+│   │   ├── property.ts
+│   │   ├── booking.ts
+│   │   └── payment.ts
+│   └── utils/
+│       └── ai.ts
+│── .env.example
+│── tsconfig.json

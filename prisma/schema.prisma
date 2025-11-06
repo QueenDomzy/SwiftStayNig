@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int        @id @default(autoincrement())
+  full_name        String
+  email            String     @unique
+  phone            String?
+  password         String
+  role             String     @default("guest")
+  createdAt        DateTime   @default(now())
+  bookings         Booking[]
+  propertiesHosted Property[] @relation("HostProperties")
+  propertiesOwned  Property[] @relation("OwnerProperties")
+  reviews          Review[]
+}
+
+model Property {
+  id            Int       @id @default(autoincrement())
+  ownerId       Int
+  description   String?
+  location      String
+  price         Float
+  images        String[]
+  createdAt     DateTime  @default(now())
+  hostId        Int?
+  title         String
+  pricePerNight Float?
+  propertyName  String
+  bookings      Booking[]
+  host          User?     @relation("HostProperties", fields: [hostId], references: [id])
+  owner         User      @relation("OwnerProperties", fields: [ownerId], references: [id])
+  reviews       Review[]
+}
+
+model Booking {
+  id         Int           @id @default(autoincrement())
+  propertyId Int
+  userId     Int
+  checkIn    DateTime
+  checkOut   DateTime
+  totalPrice Float
+  commission Float
+  createdAt  DateTime      @default(now())
+  status     BookingStatus @default(PENDING)
+  property   Property      @relation(fields: [propertyId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
+  payments   Payment[]
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  userId     Int
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  property   Property @relation(fields: [propertyId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id        Int     @id @default(autoincrement())
+  amount    Float
+  method    String
+  provider  String?
+  status    String
+  reference String?
+  bookingId Int
+  booking   Booking @relation(fields: [bookingId], references: [id])
+}
+
+enum Role {
+  GUEST
+  HOTEL
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
